@@ -15,6 +15,21 @@ jobs:
         mongodb-version: ['7.0', '8.0']
 
     runs-on: ${{ matrix.os }}
+      
+    services:
+      mongodb:
+        image: mongo:${{ matrix.mongodb-version }}
+        env:
+          MONGO_INITDB_ROOT_USERNAME: admin
+          MONGO_INITDB_ROOT_PASSWORD: admin
+          MONGO_INITDB_DATABASE: test
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd mongo
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
     - name: Git checkout
@@ -25,11 +40,6 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
-    
-    - name: Start MongoDB ${{ matrix.mongodb-version }}
-      uses: supercharge/mongodb-github-action@1.11.0
-      with:
-        mongodb-version: ${{ matrix.mongodb-version }}
 
     - name: Install dependencies
       run: npm install
