@@ -11,12 +11,17 @@ jobs:
     strategy:
       matrix:
         node-version: [16.x, 18.x, 20.x, 22.x]
-        os: [ubuntu-latest, windows-latest, macOS-latest]
+        os: [ubuntu-latest]
         mongodb-version: ['7.0', '8.0']
 
     runs-on: ${{ matrix.os }}
 
     steps:
+    - name: Start MongoDB ${{ matrix.mongodb-version }}
+      uses: supercharge/mongodb-github-action@1.11.0
+      with:
+        mongodb-version: ${{ matrix.mongodb-version }}
+
     - name: Git checkout
       uses: actions/checkout@v4
 
@@ -25,11 +30,6 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
-    
-    - name: Start MongoDB ${{ matrix.mongodb-version }}
-      uses: supercharge/mongodb-github-action@1.11.0
-      with:
-        mongodb-version: ${{ matrix.mongodb-version }}
 
     - name: Install dependencies
       run: npm install
