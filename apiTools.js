@@ -1,20 +1,6 @@
 const excludedFields = ["search", "sort", "limit", "fields", "skip", "page"];
 const specialCommands = ["s", "p"];
 
-/*
-
-const clean = function (Model, params) {
-  const permittedParams = Model.getPermittedParams();
-  const cleanedParams = {};
-  Object.keys(params).forEach((param) => {
-    if (permittedParams.includes(param)) {
-      cleanedParams[param] = params[param];
-    }
-  });
-  return cleanedParams;
-};
-*/
-
 const removeExtraFields = function (Model, params) {
   const schema = getSchemaFields(Model);
   const cleanedParams = {};
@@ -99,35 +85,7 @@ const getSchemaFields = function (Model) {
   return schema;
 };
 
-
-
-/*
- * Get the ref of a field from a Mongoose model.
- * @param {Mongoose.Model} Model - The Mongoose model.
- * @param {string} fieldName - The name of the field to get the ref from.
- * @returns {string|undefined} The ref of the field, or undefined if not found or not a ref field.
- 
-function getFieldRef(Model, fieldName) {
-  // Access the schema definition of the field
-  const fieldDefinition = Model.schema.path(fieldName);
-
-  // Check if the field exists and has a ref property
-  if (
-    fieldDefinition &&
-    fieldDefinition.options &&
-    fieldDefinition.options.ref
-  ) {
-    return fieldDefinition.options.ref;
-  }
-
-  // Return undefined if the field does not exist or does not have a ref property
-  return undefined;
-}
-
-*/
-
 module.exports = {
   removeExtraFields,
   getCookie,
-//getFieldRef,
 };
