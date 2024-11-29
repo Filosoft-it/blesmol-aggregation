@@ -63,7 +63,7 @@ this function uses two implicit parameters:
 `this.model` (the mongoose model for the collection)
 `this.aggregatePipeline` (the aggregation pipeline that has been defined elsewhere in the code)
 
-The function adds the `count` stage to the aggregation pipeline.
+The function adds the `$count` stage to the aggregation pipeline.
 
 ### Example
 
