@@ -127,7 +127,6 @@ function getFieldRef(Model, fieldName) {
 */
 
 module.exports = {
-  clean,
   removeExtraFields,
   getCookie,
 //getFieldRef,

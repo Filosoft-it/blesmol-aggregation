@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "main": "apiFeatures.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "NODE_ENV=development nodemon ./dev/index_dev.js",
+    "prepublishOnly": "npm run test"
   },
   "keywords": [],
   "author": "",
@@ -12,5 +14,20 @@
   "dependencies": {
     "lorikeet-logger": "^1.1.3",
     "mongoose": "^8.8.3"
+  },
+  "devDependencies": {
+    "express": "^4.21.1",
+    "nodemon": "^3.1.7"
+  },
+  "files": [
+    "index.js",
+    "apiTools.js",
+    "apiFeatures.js",
+    "LICENSE",
+    "README.md",
+    "package.json"
+  ],
+  "engines": {
+    "node": ">=16.13.0"
   }
 }
