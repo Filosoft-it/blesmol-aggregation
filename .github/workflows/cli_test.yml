@@ -19,10 +19,6 @@ jobs:
     services:
       mongodb:
         image: mongo:${{ matrix.mongodb-version }}
-        env:
-          MONGO_INITDB_ROOT_USERNAME: admin
-          MONGO_INITDB_ROOT_PASSWORD: admin
-          MONGO_INITDB_DATABASE: test
         ports:
           - 27017:27017
         options: >-
