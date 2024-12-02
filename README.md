@@ -1,4 +1,4 @@
-# apiFeatures
+# blesmol-aggregation
 
 ## Description
 
@@ -75,4 +75,31 @@ items.aggregatePipeline = [
 ];
 
 const count = await items.count();
+```
+
+### `sort()`
+
+the `sort()` function adds a sort operation (`$sort`) to the mongoDB aggregation pipeline based on one or more fields specified in the query string (`this.queryString.sort`).
+
+```bash
+GET /api/items?sort=-date,name
+```
+
+The function extracts the sort fields which are separated into an array.
+For each field:
+- If it starts with `-`, the field is sorted in descending order (`order = -1`).
+- If there is no `-` sign, the field is sorted in ascending order (`order = 1`).
+
+```javascript
+aggregateParam = { date: -1, name: 1 }; //{filter: order}
+```
+If no sort order is specified, sorts by `createdAt` in descending order.
+
+The function adds the `$count` stage to the aggregation pipeline.
+
+### Example
+
+```javascript
+const familyQuery = query;
+familyQuery.where(familyFilters).sort({ isMother: -1 });
 ```
