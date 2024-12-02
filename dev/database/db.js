@@ -25,6 +25,13 @@ async function connectDB() {
   return mongoose.connection;
 }
 
+async function closeDB() {
+  if (mongoose.connection.readyState === 1) {
+    await mongoose.connection.close();
+    logger.info("Database connection closed");
+  }
+}
+
 async function restoreDB() {
   if (!mongoose.connection.db) {
     logger.err("Database connection is not available");
@@ -51,4 +58,4 @@ async function restoreDB() {
   }
 }
 
-module.exports = { connectDB };
+module.exports = { connectDB, closeDB };
