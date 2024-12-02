@@ -3,6 +3,10 @@ const logger = require("lorikeet-logger");
 
 const mongoose = require("mongoose");
 
+logger.configure({
+  hideLog: process.env.NODE_ENV === "test",
+});
+
 class APIfeatures {
   constructor(query, req) {
     this.query = query;

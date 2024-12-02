@@ -1,4 +1,4 @@
-export const testItems = [
+const testItems = [
   {
     _id: "item1",
     name: "Laptop",
@@ -27,3 +27,5 @@ export const testItems = [
     updateAt: new Date("2023-11-13T12:00:00Z"),
   },
 ];
+
+module.exports = { testItems };
