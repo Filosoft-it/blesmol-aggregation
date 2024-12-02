@@ -40,11 +40,11 @@ describe("API Tests", () => {
 
   describe("API Endpoints", () => {
     it("Should handle /users endpoint", async () => {
-      await testInstance.generateTest("/users", [], expectedData.items);
+      await testInstance.generateTest("/users", [], expectedData.user1);
     });
 
     it("Should handle /items endpoint", async () => {
-      await testInstance.generateTest("/items", [], expectedData.items);
+      await testInstance.generateTest("/items", [], expectedData.item1);
     });
   });
 });

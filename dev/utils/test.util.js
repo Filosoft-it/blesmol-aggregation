@@ -12,7 +12,7 @@ class Test {
    * @param {Object} expectedData - The expected data to compare with the response
    */
   generateTest(baseUrl, requestParams, expectedData) {
-    if (!baseUrl || !requestParams ) {
+    if (!baseUrl || !requestParams) {
       throw new Error("Missing or invalid parameters");
     }
 
@@ -28,9 +28,11 @@ class Test {
     // Send the request and validate the response
     return request(this.app)
       .get(url)
-      .expect(function(res) {
+      .expect(function (res) {
         if (res.status !== 200) {
-          throw new Error(res.body.error);
+          const error = new Error(res.body.message);
+          error.stack = res.body.stack;
+          throw error;
         } else {
           this.#compareResponse(res.body, expectedData);
         }
@@ -45,11 +47,12 @@ class Test {
    * @throws Will throw an error if the response data doesn't match the expected data
    */
   #compareResponse(response, expectedData) {
-    if (!response || !expectedData) {
-      throw new Error("Missing response or expected data");
+    if (!response) {
+      throw new Error("Missing response data");
     }
-
-    console.log("Comparing response and expected data...");
+    if (!expectedData) {
+      throw new Error("Missing expected data");
+    }
 
     // Check if the response data matches the expected data
     if (JSON.stringify(response.data) !== JSON.stringify(expectedData)) {

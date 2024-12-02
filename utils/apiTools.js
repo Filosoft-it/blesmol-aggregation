@@ -2,8 +2,11 @@ const excludedFields = ["search", "sort", "limit", "fields", "skip", "page"];
 const specialCommands = ["s", "p"];
 
 const removeExtraFields = function (Model, params) {
+  if (!params) return {};
+
   const schema = getSchemaFields(Model);
   const cleanedParams = {};
+
 
   Object.keys(params).forEach((param) => {
     // unpack objects into strings with . notation

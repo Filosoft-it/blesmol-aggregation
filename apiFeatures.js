@@ -9,9 +9,10 @@ logger.configure({
 
 class APIfeatures {
   constructor(query, req) {
+
     this.query = query;
     this.queryString = req.query;
-    this.lang = apiTools.getCookie(req, "lang") || "it";
+    this.lang = req.query?.lang || global.apiFeatures.translations.defaultLang;
 
     //* AGGREGATE
     this.aggregatePipeline = [];
@@ -20,6 +21,42 @@ class APIfeatures {
 
     logger.info("ApiFeatures Params", this.queryString);
   }
+
+  /**
+   * Configures global settings for the application.
+   *
+   * @param {Object} settings - The configuration settings.
+   * @param {Object} settings.translations - Translation settings.
+   * @param {boolean} [settings.translations.enabled=false] - Flag to enable or disable translations.
+   * @param {string} [settings.translations.defaultLang="en"] - Default language for translations.
+   * @param {string[]} [settings.translations.availableLangs=["en"]] - List of available languages for translations.
+   * @param {boolean} settings.usePermitParams - Flag to enable or disable permit parameters.
+   * @param {Object} settings.pagination - Pagination settings.
+   * @param {number} [settings.pagination.defaultLimit=25] - Default limit for pagination.
+   * @param {string[]} [settings.hiddenFields=['__v', 'password', 'token']] - List of default hidden fields.
+   */
+  static configure(settings) {
+    global.apiFeatures = global.apiFeatures ? global.apiFeatures : {};
+
+    // Translations settings // TODO: Implement translations 
+    global.apiFeatures.translations = global.apiFeatures.translations ? global.apiFeatures.translations : {};
+    global.apiFeatures.translations = {
+      enabled: settings.translations?.enabled || false,
+      defaultLang: settings.translations?.defaultLang || "en",
+    };
+
+    // Permit settings // TODO: Implement permit parameters
+    global.apiFeatures.usePermitParams = settings.usePermitParams;
+
+    // Pagination settings // TODO: Implement pagination
+    global.apiFeatures.pagination = global.apiFeatures.pagination ? global.apiFeatures.pagination : {};
+    global.apiFeatures.pagination = {
+      defaultLimit: settings.pagination?.defaultLimit || 25,
+    };
+
+    // Default hidden fields // TODO: Implement hidden fields
+    global.apiFeatures.hiddenFields = settings.hiddenFields || ['__v', 'password', 'token'];
+  };
 
   /**
    * Filters the results based on the query string
@@ -35,6 +72,7 @@ class APIfeatures {
       "limit",
       "fields",
       "populate",
+      "lang",
     ];
     const queryObj = { ...this.queryString };
     excludedFields.forEach((field) => delete queryObj[field]);
@@ -45,7 +83,7 @@ class APIfeatures {
       (match) => `$${match}`
     );
 
-    const translatableFields = this.model.getTranslateTableFields
+    const translatableFields = global.apiFeatures.translations.enabled && this.model.getTranslateTableFields
       ? this.model.getTranslateTableFields()
       : null;
 
@@ -68,10 +106,11 @@ class APIfeatures {
       if (isTranslatable) {
         queryField = `translations.${this.lang}.${field}`;
 
-        // if the language is different from italian
-        if (this.lang != "it") {
+        // if the language is different from default, we will use the default language as fallback
+        const defaultLang = global.apiFeatures.translations.defaultLang;
+        if (this.lang != defaultLang) {
           // set as fallback the italian field
-          fallbackQueryField = `translations.it.${field}`;
+          fallbackQueryField = `translations.${defaultLang}.${field}`;
         }
       }
 
@@ -115,17 +154,17 @@ class APIfeatures {
             {
               [queryField]: useRegex
                 ? {
-                    $regex: parsedQueryStr[field].s,
-                    $options: "i",
-                  }
+                  $regex: parsedQueryStr[field].s,
+                  $options: "i",
+                }
                 : parsedQueryStr[field],
             },
             {
               [fallbackQueryField]: useRegex
                 ? {
-                    $regex: parsedQueryStr[field].s,
-                    $options: "i",
-                  }
+                  $regex: parsedQueryStr[field].s,
+                  $options: "i",
+                }
                 : parsedQueryStr[field],
             },
           ],
@@ -135,9 +174,9 @@ class APIfeatures {
         criteria.$match = {
           [queryField]: useRegex
             ? {
-                $regex: parsedQueryStr[field].s,
-                $options: "i",
-              }
+              $regex: parsedQueryStr[field].s,
+              $options: "i",
+            }
             : parsedQueryStr[field],
         };
       }
@@ -558,4 +597,9 @@ class APIfeatures {
     };
   }
 }
-module.exports = APIfeatures;
+
+// Set the default configuration settings
+APIfeatures.configure({});
+
+
+module.exports = APIfeatures

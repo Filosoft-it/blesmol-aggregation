@@ -8,6 +8,14 @@ const apiFeatures = require("../apiFeatures");
 const app = express();
 let server = null;
 
+apiFeatures.configure({
+  model: User,
+  allowedFields: ["name", "email"],
+  defaultSort: "name",
+  defaultLimit: 10,
+  defaultPage: 1
+});
+
 // Middleware for parsing JSON requests
 app.use(express.json());
 
@@ -31,13 +39,14 @@ app.get("/users", async (req, res) => {
 
     res.status(200).send({
       status: "success",
-      results: documents,
-      data: totalCount
+      results: totalCount,
+      data: documents
     });
   } catch (error) {
     res.status(500).send({
       status: "error",
-      error: error.toString() || "Internal Server Error"
+      message: error.message || "Internal Server Error",
+      stack: error.stack,
     });
   }
 });
@@ -57,13 +66,14 @@ app.get("/items", async (req, res) => {
 
     res.status(200).send({
       status: "success",
-      results: documents,
-      data: totalCount
+      results: totalCount,
+      data: documents
     });
   } catch (error) {
     res.status(500).send({
       status: "error",
-      error: error.toString() || "Internal Server Error"
+      message: error.message || "Internal Server Error",
+      stack: error.stack
     });
   }
 });
@@ -84,7 +94,7 @@ const startServer = async () => {
       logger.info("Database connected successfully");
     }
 
-    server =  app.listen(4300, () => {
+    server = app.listen(4300, () => {
       logger.info("Server is running on port 4300");
       logger.info("URL: http://127.0.0.1:4300");
     });
@@ -92,7 +102,7 @@ const startServer = async () => {
     logger.info(`Server loaded in ${process.env.NODE_ENV} mode`);
   } catch (error) {
     logger.err("Error starting the server:", error);
-    process.exit(1); 
+    process.exit(1);
   }
 };
 
