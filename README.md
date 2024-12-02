@@ -15,7 +15,7 @@ npm i blesmol-aggregation
 The `paginate` function implements data pagination by providing mongoDB with the number of pages to skip and the number of documents per page.
 This function takes query parameters (such as `page` and `limit`) and adds `$skip` and `$limit` stages to the aggregation pipeline. This allows fetching a subset of documents based on the requested page and the number of results per page.
 
-#### Parameters
+### Parameters
 The function uses the following parameters from the HTTP request:
 
 `page`: (optional) The page number to retrieve with default value: 1.
@@ -35,7 +35,7 @@ GET /api/items?page=3&limit=10
 `skip` = 10 * (3-1) = 20    
 //skip two pages with 10 documents per page
 
-#### Example
+### Example
 
 ```javascript
 const APIfeatures = require("apifeatures-test");
@@ -56,7 +56,7 @@ the function checks the length of the array that is returned by the `$count` pha
 - if the array contains at least one element it returns the total value (the count of documents that match).
 - if the array is empty (no matching documents) it returns 0.
 
-#### Parameters
+### Parameters
 
 this function uses two implicit parameters:
 
@@ -65,7 +65,7 @@ this function uses two implicit parameters:
 
 The function adds the `$count` stage to the aggregation pipeline.
 
-#### Example
+### Example
 
 ```javascript
 const items = new QueryHandler(Item);
@@ -77,7 +77,7 @@ items.aggregatePipeline = [
 const count = await items.count();
 ```
 
-### `sort()`
+### Function `sort()`
 
 the `sort()` function adds a sort operation (`$sort`) to the mongoDB aggregation pipeline based on one or more fields specified in the query string (`this.queryString.sort`).
 
@@ -87,19 +87,57 @@ GET /api/items?sort=-date,name
 
 The function extracts the sort fields which are separated into an array.
 For each field:
-- If it starts with `-`, the field is sorted in descending order (`order = -1`).
-- If there is no `-` sign, the field is sorted in ascending order (`order = 1`).
+- If it starts with `-`, the field is sorted in descending order.
+- If there is no `-` sign, the field is sorted in ascending order.
 
-```javascript
-aggregateParam = { date: -1, name: 1 }; //{filter: order}
-```
 If no sort order is specified, sorts by `createdAt` in descending order.
 
 The function adds the `$count` stage to the aggregation pipeline.
 
-#### Example
+### Example
 
 ```javascript
 const familyQuery = query;
 familyQuery.where(familyFilters).sort({ isMother: -1 });
 ```
+
+### `filter()`
+
+This function uses a MongoDB aggregation pipeline to filter data based on parameters received in queryString.
+At first it creates a clean copy of the querystring by skipping the fields that should not be used to filter the data and converting comparison operators (`gte`, `gt`, `lte`, `lt`, `ne`) to their mongoDB equivalents for query compatibility (`gte` -> `$gte`...). Then checks whether a field is translatable and, if so, prepares field names for the current language and a fallback language.
+
+The funcion convert the fields to the correct type (`Date`, `Number`, `Boolean`).
+Each filter field generates a `$match` criteria to add to the pipeline.
+- If a field is translatable, `$or` criteria are generated to handle both the current language and the fallback language 
+- If the field is not translatable it match for the field directly.
+
+The aggregation pipeline is then updated with the filter criteria.
+
+### Example
+
+```bash
+GET /api/products?price[gte]=10&price[lte]=50&name[s]=phone
+```
+
+- Converts: 
+
+```javascript
+{ price: { gte: 10, lte: 50 }, name: { s: "phone" } }
+```
+
+- in:
+ 
+```javascript
+{ price: { $gte: 10, $lte: 50 }, name: { $regex: "phone", $options: "i" } }
+```
+
+- generate a `$match` phase for the pipeline
+
+```javascript
+[
+  { $match: { price: { $gte: 10, $lte: 50 } } },
+  { $match: { name: { $regex: "phone", $options: "i" } } }
+]
+```
+
+
