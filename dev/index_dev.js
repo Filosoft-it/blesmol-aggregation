@@ -21,7 +21,7 @@ app.use(express.json());
 
 // Routes definition (could be moved to a separate file for better organization)
 app.get("/", (req, res) => {
-  res.send("Hello World");
+  res.status(200).send();
 });
 
 app.get("/users", async (req, res) => {
@@ -91,7 +91,6 @@ const startServer = async () => {
   try {
     if (process.env.NODE_ENV !== "test") {
       await database.connectDB();
-      logger.info("Database connected successfully");
     }
 
     server = app.listen(4300, () => {

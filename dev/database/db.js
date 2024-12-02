@@ -50,7 +50,7 @@ async function restoreDB() {
     logger.info("|- Updating items");
     await ItemsModel.insertMany(testItems.testItems);
 
-    logger.info("Database successfully restored");
+    logger.info("Database successfully restored!\n");
   } catch (err) {
     logger.err("💔 Error during database restoration");
     logger.err(err);
