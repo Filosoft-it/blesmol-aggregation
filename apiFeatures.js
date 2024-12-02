@@ -12,7 +12,13 @@ class APIfeatures {
   constructor(query, req) {
     this.query = query;
     this.queryString = req.query;
-    this.lang = req.query?.lang || global.apiFeatures.translations.defaultLang;
+
+    // Manage the language, if present in the query string override the cookie
+    this.lang = apiTools.getCookie(req, "lang");
+    if (req.query.lang !== undefined) {
+      this.lang = req.query.lang;
+    }
+    this.lang = this.lang || global.apiFeatures.translations.defaultLang;
 
     //* AGGREGATE
     this.aggregatePipeline = [];
@@ -70,6 +76,7 @@ class APIfeatures {
       "page",
       "sort",
       "limit",
+      "skip",
       "fields",
       "populate",
       "lang",

@@ -35,8 +35,16 @@ describe("API Tests", () => {
     expectedData.user9 = await User.find({ name: "Jane Smith" }, "name email");
     expectedData.user10 = await User.find({ name: { $regex: "John", $options: "i" } }, "name email");
     expectedData.user11 = await User.find({ $or: [{ name: { $regex: "example1", $options: "i" } }, { email: { $regex: "example1", $options: "i" } }] });
+
     expectedData.item1 = await Item.find({});
     expectedData.item2 = await Item.find({}).populate("users");
+    expectedData.item3 = await Item.find({}).limit(1);
+    expectedData.item4 = await Item.find({}).skip(1).limit(1);
+    expectedData.item5 = await Item.find({}).sort("name").skip(1).limit(1);
+    expectedData.item6 = await Item.find({}).sort("name").skip(1).limit(1).populate("users", "name");
+    expectedData.item7 = await Item.find({}).skip(2);
+    expectedData.item8 = await Item.find({}).sort({ _id: -1 });
+    expectedData.item9 = await Item.find({}).skip(1).limit(2);
   });
 
   afterAll(async () => {
@@ -53,12 +61,10 @@ describe("API Tests", () => {
   });
 
   describe("API Endpoints", () => {
+    // Users
+
     it("Should handle /users endpoint", async () => {
       await testInstance.generateTest("/users", [], expectedData.user1);
-    });
-
-    it("Should handle /items endpoint", async () => {
-      await testInstance.generateTest("/items", [], expectedData.item1);
     });
 
     it("Should handle /users endpoint with params: name=Jane Smith", async () => {
@@ -101,15 +107,42 @@ describe("API Tests", () => {
       await testInstance.generateTest("/users", ["search=example1"], expectedData.user11);
     });
 
+    // Items
 
+    it("Should handle /items endpoint", async () => {
+      await testInstance.generateTest("/items", [], expectedData.item1);
+    });
 
     it("Should handle /items endpoint with params: users[p]=*", async () => {
       await testInstance.generateTest("/items", ["users[p]=*"], expectedData.item2);
     });
 
+    it("Should handle /items endpoint with params: limit=1", async () => {
+      await testInstance.generateTest("/items", ["limit=1"], expectedData.item3);
+    });
 
+    it("Should handle /items endpoint with params: limit=1&page=2", async () => {
+      await testInstance.generateTest("/items", ["limit=1", "page=2"], expectedData.item4);
+    });
 
-    // TODO: Test pagination, limit
+    it("Should handle /items endpoint with params: limit=1&page=2&sort=name", async () => {
+      await testInstance.generateTest("/items", ["limit=1", "page=2", "sort=name"], expectedData.item5);
+    });
 
+    it("Should handle /items endpoint with params: limit=1&page=2&sort=name&users[p]=name", async () => {
+      await testInstance.generateTest("/items", ["limit=1", "page=2", "sort=name", "users[p]=name"], expectedData.item6);
+    });
+
+    it("Should handle /items endpoint with params: skip=2", async () => {
+      await testInstance.generateTest("/items", ["skip=2"], expectedData.item7);
+    });
+
+    it("Should handle /items endpoint with params: sort=-_id", async () => {
+      await testInstance.generateTest("/items", ["sort=-_id"], expectedData.item8);
+    });
+
+    it("Should handle /items endpoint with params: skip=1&limit=2", async () => {
+      await testInstance.generateTest("/items", ["skip=1", "limit=2"], expectedData.item9);
+    });
   });
 });
