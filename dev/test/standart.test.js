@@ -23,7 +23,20 @@ describe("API Tests", () => {
 
     // Fetch initial data from the database for comparison
     expectedData.user1 = await User.find({});
+    expectedData.user2 = await User.where("name").equals("Jane Smith");
+    expectedData.user3 = await User.find({
+      name: { $regex: "John", $options: "i" },
+    })
+    expectedData.user4 = await User.find({}).sort("name");
+    expectedData.user5 = await User.find({}).sort({ name: -1 });
+    expectedData.user6 = await User.find({}, "name email");
+    expectedData.user7 = await User.find({}).populate("items");
+    expectedData.user8 = await User.find({ name: "Jane Smith" }).sort("name");
+    expectedData.user9 = await User.find({ name: "Jane Smith" }, "name email");
+    expectedData.user10 = await User.find({ name: { $regex: "John", $options: "i" } }, "name email");
+    expectedData.user11 = await User.find({ $or: [{ name: { $regex: "example1", $options: "i" } }, { email: { $regex: "example1", $options: "i" } }] });
     expectedData.item1 = await Item.find({});
+    expectedData.item2 = await Item.find({}).populate("users");
   });
 
   afterAll(async () => {
@@ -47,5 +60,56 @@ describe("API Tests", () => {
     it("Should handle /items endpoint", async () => {
       await testInstance.generateTest("/items", [], expectedData.item1);
     });
+
+    it("Should handle /users endpoint with params: name=Jane Smith", async () => {
+      await testInstance.generateTest("/users", ["name=Jane Smith"], expectedData.user2);
+    });
+
+    it("Should handle /users endpoint with params: name[s]=John", async () => {
+      await testInstance.generateTest("/users", ["name[s]=John"], expectedData.user3);
+    });
+
+    it("Should handle /users endpoint with params: sort=name", async () => {
+      await testInstance.generateTest("/users", ["sort=name"], expectedData.user4);
+    });
+
+    it("Should handle /users endpoint with params: sort=-name", async () => {
+      await testInstance.generateTest("/users", ["sort=-name"], expectedData.user5);
+    });
+
+    it("Should handle /users endpoint with params: fields=name;email", async () => {
+      await testInstance.generateTest("/users", ["fields=name;email"], expectedData.user6);
+    });
+
+    it("Should handle /users endpoint with params: items[p]=*", async () => {
+      await testInstance.generateTest("/users", ["items[p]=*"], expectedData.user7);
+    });
+
+    it("Should handle /users endpoint with params: name=Jane Smith&sort=name", async () => {
+      await testInstance.generateTest("/users", ["name=Jane Smith", "sort=name"], expectedData.user8);
+    });
+
+    it("Should handle /users endpoint with params: name=Jane Smith&fields=name;email", async () => {
+      await testInstance.generateTest("/users", ["name=Jane Smith", "fields=name;email"], expectedData.user9);
+    });
+
+    it("Should handle /users endpoint with params: name[s]=John&fields=name;email", async () => {
+      await testInstance.generateTest("/users", ["name[s]=John", "fields=name;email"], expectedData.user10);
+    });
+
+    it("Should handle /users endpoint with params: search=example1", async () => {
+      await testInstance.generateTest("/users", ["search=example1"], expectedData.user11);
+    });
+
+
+
+    it("Should handle /items endpoint with params: users[p]=*", async () => {
+      await testInstance.generateTest("/items", ["users[p]=*"], expectedData.item2);
+    });
+
+
+
+    // TODO: Test pagination, limit
+
   });
 });

@@ -54,11 +54,45 @@ class Test {
       throw new Error("Missing expected data");
     }
 
+    // Remove fields that are not relevant for comparison
+    const fieldsToRemove = ["relevance"];
+    response.data = this.#removeFields(response.data, fieldsToRemove);
+
     // Check if the response data matches the expected data
     if (JSON.stringify(response.data) !== JSON.stringify(expectedData)) {
+      console.log("Response data:", response.data);
+      console.log("Expected data:", expectedData);
       throw new Error(`Response data does not match the expected data`);
     }
     return true;
+  }
+
+  #removeFields(obj, fieldsToRemove) {
+    if (!obj || !fieldsToRemove) {
+      return obj;
+    }
+
+    if (Array.isArray(obj)) {
+      return obj.map((item) => this.#removeFields(item, fieldsToRemove));
+    }
+
+    if (typeof obj === "object") {
+      for (const field in obj) {
+        if (typeof obj[field] === "object") {
+          obj[field] = this.#removeFields(obj[field], fieldsToRemove);
+        }
+
+        if (Array.isArray(obj[field])) {
+          obj[field] = obj[field].map((item) => this.#removeFields(item, fieldsToRemove));
+        }
+
+        if (fieldsToRemove.includes(field)) {
+          delete obj[field];
+        }
+      }
+    }
+
+    return obj;
   }
 }
 

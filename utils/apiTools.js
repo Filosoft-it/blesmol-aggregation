@@ -7,7 +7,6 @@ const removeExtraFields = function (Model, params) {
   const schema = getSchemaFields(Model);
   const cleanedParams = {};
 
-
   Object.keys(params).forEach((param) => {
     // unpack objects into strings with . notation
     if (typeof params[param] === "object") {

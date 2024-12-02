@@ -10,7 +10,6 @@ logger.configure({
 
 class APIfeatures {
   constructor(query, req) {
-
     this.query = query;
     this.queryString = req.query;
     this.lang = req.query?.lang || global.apiFeatures.translations.defaultLang;
@@ -20,7 +19,7 @@ class APIfeatures {
     this.model = mongoose.model(this.query.model.modelName);
     this.queryString = apiTools.removeExtraFields(this.model, this.queryString);
 
-    logger.info("ApiFeatures Params", this.queryString);
+    if (global.apiFeatures.debug.logQuery) console.log("ApiFeatures Params:", this.queryString);
   }
 
   /**
@@ -28,35 +27,35 @@ class APIfeatures {
    *
    * @param {Object} settings - The configuration settings.
    * @param {Object} settings.translations - Translation settings.
-   * @param {boolean} [settings.translations.enabled=false] - Flag to enable or disable translations.
+   * @param {boolean} [settings.translations.enabled=false] - Enable or disable translations.
    * @param {string} [settings.translations.defaultLang="en"] - Default language for translations.
-   * @param {string[]} [settings.translations.availableLangs=["en"]] - List of available languages for translations.
-   * @param {boolean} settings.usePermitParams - Flag to enable or disable permit parameters.
+   * @param {string[]} [settings.translations.availableLangs=["en"]] - Available languages for translations.
    * @param {Object} settings.pagination - Pagination settings.
    * @param {number} [settings.pagination.defaultLimit=25] - Default limit for pagination.
-   * @param {string[]} [settings.hiddenFields=['__v', 'password', 'token']] - List of default hidden fields.
+   * @param {Object} [settings.debug] - Debug/logging settings.
+   * @param {boolean} [settings.debug.logQuery=false] - Log the api query parameters.
    */
   static configure(settings) {
     global.apiFeatures = global.apiFeatures ? global.apiFeatures : {};
 
-    // Translations settings // TODO: Implement translations 
+    // Translations settings
     global.apiFeatures.translations = global.apiFeatures.translations ? global.apiFeatures.translations : {};
     global.apiFeatures.translations = {
       enabled: settings.translations?.enabled || false,
       defaultLang: settings.translations?.defaultLang || "en",
     };
 
-    // Permit settings // TODO: Implement permit parameters
-    global.apiFeatures.usePermitParams = settings.usePermitParams;
-
-    // Pagination settings // TODO: Implement pagination
+    // Pagination settings
     global.apiFeatures.pagination = global.apiFeatures.pagination ? global.apiFeatures.pagination : {};
     global.apiFeatures.pagination = {
       defaultLimit: settings.pagination?.defaultLimit || 25,
     };
 
-    // Default hidden fields // TODO: Implement hidden fields
-    global.apiFeatures.hiddenFields = settings.hiddenFields || ['__v', 'password', 'token'];
+    // Debug/logging settings
+    global.apiFeatures.debug = global.apiFeatures.debug ? global.apiFeatures.debug : {};
+    global.apiFeatures.debug = {
+      logQuery: settings.debug?.logQuery || false,
+    };
   };
 
   /**
@@ -203,13 +202,12 @@ class APIfeatures {
     const fieldsType = "String";
     for (const field of fields.split(";")) {
       if (this.model.schema.path(field).instance !== fieldsType) {
-        logger.err(`The fields ${fields} are not all String type.`);
         return this;
       }
     }
 
     // Check if the model has translatable fields
-    const translatableFields = this.model.getTranslateTableFields
+    const translatableFields = global.apiFeatures.translations.enabled && this.model.getTranslateTableFields
       ? this.model.getTranslateTableFields()
       : null;
 
@@ -219,6 +217,8 @@ class APIfeatures {
       for (const key of fields.split(";")) {
         let queryKey = key;
         let fallbackQueryKey = key;
+
+
 
         // Check if the field is a translatable field
         const isTranslatable =
@@ -345,7 +345,7 @@ class APIfeatures {
   // paginate the results, e.g. ?page=2&limit=10 aka handle skip and page stages
   paginate() {
     const page = this.queryString.page * 1 || 1; // Convert to number with default 1
-    const limit = this.queryString.limit * 1 || 25; // Convert to number with default 25
+    const limit = this.queryString.limit * 1 || global.apiFeatures.pagination.defaultLimit;
     const skip = limit * (page - 1); // Calculate the number of documents to skip
 
     // Push $skip and $limit stages to the aggregateParams array
@@ -394,6 +394,7 @@ class APIfeatures {
       if (this.queryString[key].p) {
         let refModel = this.model.schema.path(key.replace("->", ".")).options
           .ref;
+
         populateFound.push({
           from: refModel,
           localField: key,
@@ -581,11 +582,6 @@ class APIfeatures {
         },
       },
     ];
-
-    logger.info(
-      "aggregatePipeline",
-      this.facetedPipeline[0]["$facet"].documents
-    );
 
     const result = await this.model.aggregate(this.facetedPipeline);
 

@@ -15,10 +15,10 @@ const itemsSchema = new mongoose.Schema({
     required: true,
     maxlength: 1000,
   },
-  user: {
-    type: String,
+  users: {
+    type: [String],
     required: true,
-    ref: "Users",
+    ref: "User",
   },
   externalId: {
     type: Number,
@@ -34,5 +34,5 @@ const itemsSchema = new mongoose.Schema({
   },
 });
 
-const ItemsModel = mongoose.model("Items", itemsSchema);
+const ItemsModel = mongoose.model("Item", itemsSchema);
 module.exports = ItemsModel;

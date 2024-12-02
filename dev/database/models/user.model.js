@@ -18,7 +18,7 @@ const usersSchema = new mongoose.Schema({
   items: {
     type: [String],
     required: true,
-    ref: "Items",
+    ref: "Item",
   },
   createAt: {
     type: Date,
@@ -30,5 +30,5 @@ const usersSchema = new mongoose.Schema({
   },
 });
 
-const UsersModel = mongoose.model("Users", usersSchema);
+const UsersModel = mongoose.model("User", usersSchema);
 module.exports = UsersModel;

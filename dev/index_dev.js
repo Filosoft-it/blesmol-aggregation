@@ -8,14 +8,6 @@ const apiFeatures = require("../apiFeatures");
 const app = express();
 let server = null;
 
-apiFeatures.configure({
-  model: User,
-  allowedFields: ["name", "email"],
-  defaultSort: "name",
-  defaultLimit: 10,
-  defaultPage: 1
-});
-
 // Middleware for parsing JSON requests
 app.use(express.json());
 
@@ -27,7 +19,8 @@ app.get("/", (req, res) => {
 app.get("/users", async (req, res) => {
   try {
     const query = User.find();
-    const features = new apiFeatures(query, req.query)
+    const features = new apiFeatures(query, req)
+      .search("name;email")
       .filter()
       .sort()
       .limitFields()
@@ -54,7 +47,8 @@ app.get("/users", async (req, res) => {
 app.get("/items", async (req, res) => {
   try {
     const query = Item.find();
-    const features = new apiFeatures(query, req.query)
+    const features = new apiFeatures(query, req)
+      .search("name")
       .filter()
       .sort()
       .limitFields()
@@ -93,9 +87,11 @@ const startServer = async () => {
       await database.connectDB();
     }
 
-    server = app.listen(4300, () => {
-      logger.info("Server is running on port 4300");
-      logger.info("URL: http://127.0.0.1:4300");
+    const PORT = process.env.NODE_ENV === "test" ? 4301 : 4300;
+
+    server = app.listen(PORT, () => {
+      logger.info("Server is running on port " + PORT);
+      logger.info("URL: http://127.0.0.1:" + PORT);
     });
 
     logger.info(`Server loaded in ${process.env.NODE_ENV} mode`);

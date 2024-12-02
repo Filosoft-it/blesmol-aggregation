@@ -15,7 +15,7 @@ npm i blesmol-aggregation
 The `paginate` function implements data pagination by providing mongoDB with the number of pages to skip and the number of documents per page.
 This function takes query parameters (such as `page` and `limit`) and adds `$skip` and `$limit` stages to the aggregation pipeline. This allows fetching a subset of documents based on the requested page and the number of results per page.
 
-### Parameters
+#### Parameters
 The function uses the following parameters from the HTTP request:
 
 `page`: (optional) The page number to retrieve with default value: 1.
@@ -35,7 +35,7 @@ GET /api/items?page=3&limit=10
 `skip` = 10 * (3-1) = 20    
 //skip two pages with 10 documents per page
 
-### Example
+#### Example
 
 ```javascript
 const APIfeatures = require("apifeatures-test");
@@ -56,7 +56,7 @@ the function checks the length of the array that is returned by the `$count` pha
 - if the array contains at least one element it returns the total value (the count of documents that match).
 - if the array is empty (no matching documents) it returns 0.
 
-### Parameters
+#### Parameters
 
 this function uses two implicit parameters:
 
@@ -65,7 +65,7 @@ this function uses two implicit parameters:
 
 The function adds the `$count` stage to the aggregation pipeline.
 
-### Example
+#### Example
 
 ```javascript
 const items = new QueryHandler(Item);
@@ -97,7 +97,7 @@ If no sort order is specified, sorts by `createdAt` in descending order.
 
 The function adds the `$count` stage to the aggregation pipeline.
 
-### Example
+#### Example
 
 ```javascript
 const familyQuery = query;
