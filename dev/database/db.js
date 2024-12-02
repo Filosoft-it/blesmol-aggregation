@@ -25,6 +25,13 @@ async function connectDB() {
   return mongoose.connection;
 }
 
+async function closeDB() {
+  if (mongoose.connection.readyState === 1) {
+    await mongoose.connection.close();
+    logger.info("Database connection closed");
+  }
+}
+
 async function restoreDB() {
   if (!mongoose.connection.db) {
     logger.err("Database connection is not available");
@@ -43,7 +50,7 @@ async function restoreDB() {
     logger.info("|- Updating items");
     await ItemsModel.insertMany(testItems.testItems);
 
-    logger.info("Database successfully restored");
+    logger.info("Database successfully restored!\n");
   } catch (err) {
     logger.err("💔 Error during database restoration");
     logger.err(err);
@@ -51,4 +58,4 @@ async function restoreDB() {
   }
 }
 
-module.exports = { connectDB };
+module.exports = { connectDB, closeDB };

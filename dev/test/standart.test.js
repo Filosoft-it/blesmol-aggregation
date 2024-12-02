@@ -29,6 +29,7 @@ describe("API Tests", () => {
   afterAll(async () => {
     // Close the database connection after all tests are done
     await serverApp.stopServer();
+    await database.closeDB();
   });
 
   describe("Server up", () => {

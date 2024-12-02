@@ -5,6 +5,7 @@ const mongoose = require("mongoose");
 
 logger.configure({
   hideLog: process.env.NODE_ENV === "test",
+  emoji: false,
 });
 
 class APIfeatures {
