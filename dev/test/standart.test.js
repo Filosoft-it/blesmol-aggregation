@@ -23,28 +23,34 @@ describe("API Tests", () => {
 
     // Fetch initial data from the database for comparison
     expectedData.user1 = await User.find({});
-    expectedData.user2 = await User.where("name").equals("Jane Smith");
+    expectedData.user2 = await User.where('name').equals('Jane Smith');
     expectedData.user3 = await User.find({
-      name: { $regex: "John", $options: "i" },
-    })
-    expectedData.user4 = await User.find({}).sort("name");
+      name: { $regex: 'John', $options: 'i' }
+    });
+    expectedData.user4 = await User.find({}).sort('name');
     expectedData.user5 = await User.find({}).sort({ name: -1 });
-    expectedData.user6 = await User.find({}, "name email");
-    expectedData.user7 = await User.find({}).populate("items");
-    expectedData.user8 = await User.find({ name: "Jane Smith" }).sort("name");
-    expectedData.user9 = await User.find({ name: "Jane Smith" }, "name email");
-    expectedData.user10 = await User.find({ name: { $regex: "John", $options: "i" } }, "name email");
-    expectedData.user11 = await User.find({ $or: [{ name: { $regex: "example1", $options: "i" } }, { email: { $regex: "example1", $options: "i" } }] });
+    expectedData.user6 = await User.find({}, 'name email');
+    expectedData.user7 = await User.find({}).populate('items');
+    expectedData.user8 = await User.find({ name: 'Jane Smith' }).sort('name');
+    expectedData.user9 = await User.find({ name: 'Jane Smith' }, 'name email');
+    expectedData.user10 = await User.find({ name: { $regex: 'John', $options: 'i' } }, 'name email');
+    expectedData.user11 = await User.find({
+      $or: [{ name: { $regex: 'example1', $options: 'i' } }, { email: { $regex: 'example1', $options: 'i' } }]
+    });
 
     expectedData.item1 = await Item.find({});
-    expectedData.item2 = await Item.find({}).populate("users");
+    expectedData.item2 = await Item.find({}).populate('users');
     expectedData.item3 = await Item.find({}).limit(1);
     expectedData.item4 = await Item.find({}).skip(1).limit(1);
-    expectedData.item5 = await Item.find({}).sort("name").skip(1).limit(1);
-    expectedData.item6 = await Item.find({}).sort("name").skip(1).limit(1).populate("users", "name");
+    expectedData.item5 = await Item.find({}).sort('name').skip(1).limit(1);
+    expectedData.item6 = await Item.find({}).sort('name').skip(1).limit(1).populate('users', 'name');
     expectedData.item7 = await Item.find({}).skip(2);
     expectedData.item8 = await Item.find({}).sort({ _id: -1 });
     expectedData.item9 = await Item.find({}).skip(1).limit(2);
+    expectedData.item10 = await Item.find({ 'variant.color': 'Yellow' });
+    expectedData.item11 = await Item.find({}).sort('-variant.color');
+    expectedData.item12 = await Item.find({}).populate('variant.users', 'name');
+    expectedData.item13 = await Item.find({ 'variant.size': 'Medium' }).populate('variant.users', 'name');
   });
 
   afterAll(async () => {
@@ -53,14 +59,14 @@ describe("API Tests", () => {
     await database.closeDB();
   });
 
-  describe("Server up", () => {
-    it("Should return 200 when accessing the root endpoint", async () => {
-      const response = await request(app).get("/");
+  describe('Server up', () => {
+    it('Should return 200 when accessing the root endpoint', async () => {
+      const response = await request(app).get('/');
       expect(response.status).toBe(200);
     });
   });
 
-  describe("API Endpoints", () => {
+  describe('API Endpoints', () => {
     // Users
 
     it('Should handle /users endpoint', async () => {
@@ -150,5 +156,26 @@ describe("API Tests", () => {
     // it("Should handle /items endpoint with params: skip=1&limit=2", async () => {
     //   await testInstance.generateTest("/items", ["skip=1", "limit=2"], expectedData.item9);
     // });
+
+    it('Should handle /items endpoint with params: variant[color]=Yellow', async () => {
+      await testInstance.generateTest('/items', ['variant[color]=Yellow'], expectedData.item10);
+    });
+
+    it('Should handle /items endpoint with params: sort=-variant.color', async () => {
+      await testInstance.generateTest('/items', ['sort=-variant.color'], expectedData.item11);
+    });
+
+    it('Should handle /items endpoint with params: variant[users][p]=name', async () => {
+      await testInstance.generateTest('/items', ['variant[users][p]=name'], expectedData.item12);
+      console.log(expectedData.item12);
+    });
+
+    it('Should handle /items endpoint with params: variant[size]=Medium&variant[users][p]=name', async () => {
+      await testInstance.generateTest(
+        '/items',
+        ['variant[size]=Medium', 'variant[users][p]=name'],
+        expectedData.item13
+      );
+    });
   });
 });
