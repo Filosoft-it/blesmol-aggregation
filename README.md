@@ -1,5 +1,7 @@
 # blesmol-aggregation
 
+If you are looking to maintain this module, please refer to the [Development Guide](docs/dev-guide.md).
+
 ## Description
 
 This module provides a set of functions to handle MongoDB queries using the Mongoose library. It allows for easy filtering, sorting, pagination, and field selection of data. The module also provides automatic counting of results and the ability to add custom stages to the aggregation pipeline.
