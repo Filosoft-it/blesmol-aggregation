@@ -106,7 +106,7 @@ familyQuery.where(familyFilters).sort({ isMother: -1 });
 This function uses a MongoDB aggregation pipeline to filter data based on parameters received in queryString.
 At first it creates a clean copy of the querystring by skipping the fields that should not be used to filter the data and converting comparison operators (`gte`, `gt`, `lte`, `lt`, `ne`) to their mongoDB equivalents for query compatibility (`gte` -> `$gte`...). Then checks whether a field is translatable and, if so, prepares field names for the current language and a fallback language.
 
-The funcion convert the fields to the correct type (`Date`, `Number`, `Boolean`).
+The funcion convert the fields to the correct type (`Date`, `Number`, `Boolean`), checks that the name parameter has the special suffix `[s]` to use the regex.
 Each filter field generates a `$match` criteria to add to the pipeline.
 - If a field is translatable, `$or` criteria are generated to handle both the current language and the fallback language 
 - If the field is not translatable it match for the field directly.
@@ -140,4 +140,27 @@ GET /api/products?price[gte]=10&price[lte]=50&name[s]=phone
 ]
 ```
 
+### Build a `$project()` phase in the aggregation pipeline with `limitFields()`
+
+The `limitFields` function is designed to costumize wich fields are returned using the `$project` operator of the MongoDB aggregation pipeline.
+You can specify which particular fields to show, they are separated by semicolons `;` and may be prefixed with a minus sign (`-`) to indicate that a field is excluded.
+A `$project` object is created that defines which fields to include or exclude
+
+The function also verify if the Mongoose model has a table of translatable fields, if so; 
+- add the field in the current lenguage
+- add a fallback for defaul lenguage.
+
+Once the `$project` object is constructed, the function adds it to the aggregation pipeline.
+
+### Example
+
+```bash
+GET /api/products?fields=-date;-description
+```
+Date and description are removed
+
+```bash
+GET /api/products?fields=date;description;price
+```
+The function shows just this three fields.
 
