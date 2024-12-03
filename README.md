@@ -157,10 +157,41 @@ Once the `$project` object is constructed, the function adds it to the aggregati
 ```bash
 GET /api/products?fields=-date;-description
 ```
+
 Date and description are removed
 
 ```bash
 GET /api/products?fields=date;description;price
 ```
-The function shows just this three fields.
 
+The function shows just this three fields.
+ i blesmol-aggregation
+
+## Development Guide
+
+### Scripts
+
+#### `npm run dev`
+
+- **Purpose**: Starts the development environment.
+- **Notes**: Ensure all required dependencies are installed (`npm install`)
+
+#### `npm run test`
+
+- **Purpose**: Runs all tests in the package using Jest.
+- **Notes**: Useful for verifying the functionality of the application.
+
+### Environment Setup
+
+#### `.env` File
+
+When developing locally, create a `.env` file in the root of the project with the following configuration:
+
+```env
+DB_URL=<your-mongodb-url>
+```
+
+- Replace `<your-mongodb-url>` with the actual URL of your MongoDB database.
+- This ensures the application can connect to the database during development.
+
+> The database is recreated each time the application is launched
