@@ -164,3 +164,13 @@ GET /api/products?fields=date;description;price
 ```
 The function shows just this three fields.
 
+### `addStage()`
+
+The `addStage` function allows to add a custom stage to the aggregation pipeline. Takes a `pipeline` object as parameter and concatenates it.
+
+```javascript
+.addStage({ $match: { price: { $gte: 10, $lte: 50 } } });
+.addStage({ $group: { _id: "$category", total: { $sum: 1 } } });
+```
+
+
