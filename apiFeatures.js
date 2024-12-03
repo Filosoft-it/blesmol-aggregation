@@ -24,25 +24,26 @@ class APIfeatures {
     this.aggregatePipeline = [];
     this.model = mongoose.model(this.query.model.modelName);
     this.queryString = apiTools.removeExtraFields(this.model, this.queryString);
-
-    if (global.apiFeatures.debug.logQuery) console.log('ApiFeatures Params:', this.queryString);
   }
 
   /**
    * Configures global settings for the application.
-   *
-   * @param {Object} settings - The configuration settings.
-   * @param {Object} settings.translations - Translation settings.
-   * @param {boolean} [settings.translations.enabled=false] - Enable or disable translations.
-   * @param {string} [settings.translations.defaultLang="en"] - Default language for translations.
-   * @param {string[]} [settings.translations.availableLangs=["en"]] - Available languages for translations.
-   * @param {Object} settings.pagination - Pagination settings.
+   * @param {Object} settings - The settings object.
+   * @param {string[]} [settings.fieldsToHide] - Fields to hide in the response.
+   * @param {Object} [settings.translations] - Translations settings.
+   * @param {boolean} [settings.translations.enabled=false] - Enable translations.
+   * @param {string} [settings.translations.defaultLang="en"] - Default language.
+   * @param {string[]} [settings.translations.availableLangs=["en"]] - Available languages.
+   * @param {Object} [settings.pagination] - Pagination settings.
    * @param {number} [settings.pagination.defaultLimit=25] - Default limit for pagination.
    * @param {Object} [settings.debug] - Debug/logging settings.
-   * @param {boolean} [settings.debug.logQuery=false] - Log the api query parameters.
+   * @param {boolean} [settings.debug.logQuery=false] - Enable query logging.
    */
-  static configure(settings) {
+  static configure(settings = {}) {
     global.apiFeatures = global.apiFeatures ? global.apiFeatures : {};
+
+    // Fields to hide in the response
+    global.apiFeatures.fieldsToHide = settings.fieldsToHide || [];
 
     // Translations settings
     global.apiFeatures.translations = global.apiFeatures.translations ? global.apiFeatures.translations : {};
@@ -63,7 +64,7 @@ class APIfeatures {
       logQuery: settings.debug?.logQuery || false
     };
   }
-  
+
   /**
    * Filters the results based on the query string
    * e.g. ?name=John&age=30 (returns all users named John with age 30)
@@ -319,7 +320,19 @@ class APIfeatures {
         }
       });
 
-      this.aggregatePipeline.push({ $project: projectFields });
+      if (global.apiFeatures.fieldsToHide.length > 0) {
+        this.aggregatePipeline.push({
+          $project: {
+            ...projectFields,
+            ...global.apiFeatures.fieldsToHide.reduce((acc, field) => {
+              acc[field] = 0;
+              return acc;
+            })
+          }
+        });
+      } else {
+        this.aggregatePipeline.push({ $project: projectFields });
+      }
     }
 
     return this;
@@ -445,6 +458,18 @@ class APIfeatures {
         });
       }
 
+      if (global.apiFeatures.fieldsToHide.length > 0) {
+        // @ts-ignore
+        pipe.$lookup.pipeline.push({
+          $project: {
+            ...global.apiFeature.fieldsToHide.reduce((acc, field) => {
+              acc[field] = 0;
+              return acc;
+            }, {})
+          }
+        });
+      }
+
       pipeline.push(pipe);
     });
 
@@ -560,7 +585,7 @@ class APIfeatures {
 }
 
 // Set the default configuration settings
-APIfeatures.configure({});
+APIfeatures.configure();
 
 
 module.exports = APIfeatures

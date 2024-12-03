@@ -167,7 +167,6 @@ describe("API Tests", () => {
 
     it('Should handle /items endpoint with params: variant[users][p]=name', async () => {
       await testInstance.generateTest('/items', ['variant[users][p]=name'], expectedData.item12);
-      console.log(expectedData.item12);
     });
 
     it('Should handle /items endpoint with params: variant[size]=Medium&variant[users][p]=name', async () => {

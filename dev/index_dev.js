@@ -12,15 +12,15 @@ let server = null;
 app.use(express.json());
 
 // Routes definition (could be moved to a separate file for better organization)
-app.get("/", (req, res) => {
+app.get('/', (req, res) => {
   res.status(200).send();
 });
 
-app.get("/users", async (req, res) => {
+app.get('/users', async (req, res) => {
   try {
     const query = User.find();
     const features = new apiFeatures(query, req)
-      .search("name;email")
+      .search('name;email')
       .filter()
       .sort()
       .limitFields()
@@ -31,42 +31,58 @@ app.get("/users", async (req, res) => {
     const { documents, totalCount } = results;
 
     res.status(200).send({
-      status: "success",
+      status: 'success',
       results: totalCount,
       data: documents
     });
   } catch (error) {
     res.status(500).send({
-      status: "error",
-      message: error.message || "Internal Server Error",
-      stack: error.stack,
+      status: 'error',
+      message: error.message || 'Internal Server Error',
+      stack: error.stack
     });
   }
 });
 
-app.get("/items", async (req, res) => {
+app.get('/items', async (req, res) => {
   try {
     const query = Item.find();
-    const features = new apiFeatures(query, req)
-      .search("name")
-      .filter()
-      .sort()
-      .limitFields()
-      .paginate()
-      .populate();
+    const features = new apiFeatures(query, req).search('name').filter().sort().limitFields().paginate().populate();
 
     const results = await features.exec();
     const { documents, totalCount } = results;
 
     res.status(200).send({
-      status: "success",
+      status: 'success',
       results: totalCount,
       data: documents
     });
   } catch (error) {
     res.status(500).send({
-      status: "error",
-      message: error.message || "Internal Server Error",
+      status: 'error',
+      message: error.message || 'Internal Server Error',
+      stack: error.stack
+    });
+  }
+});
+
+app.get('/items', async (req, res) => {
+  try {
+    const query = Item.find();
+    const features = new apiFeatures(query, req).search('name').filter().sort().limitFields().paginate().populate();
+
+    const results = await features.exec();
+    const { documents, totalCount } = results;
+
+    res.status(200).send({
+      status: 'success',
+      results: totalCount,
+      data: documents
+    });
+  } catch (error) {
+    res.status(500).send({
+      status: 'error',
+      message: error.message || 'Internal Server Error',
       stack: error.stack
     });
   }

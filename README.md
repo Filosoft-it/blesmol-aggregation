@@ -17,6 +17,7 @@ This method is used to configure global settings for the application.
 **Parameters:**
 
 - settings: An object containing the configuration settings.
+  - fieldsToHide (default: none): Fields to hide in to results: (like password, token, ecc.)
 
   - translations: Translation settings.
 
