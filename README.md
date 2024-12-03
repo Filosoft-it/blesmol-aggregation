@@ -164,5 +164,6 @@ GET /api/products?fields=date;description;price
 ```
 The function shows just this three fields.
 
+### Automatic mongoose model field validation
 
-
+An automatic feature has been implemented that may create unexpected behavior by removing invalid fields from the request query creating a clean string.
