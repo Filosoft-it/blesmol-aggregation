@@ -236,3 +236,4 @@ DB_URL=<your-mongodb-url>
 - This ensures the application can connect to the database during development.
 
 > The database is recreated each time the application is launched
+
