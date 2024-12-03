@@ -8,6 +8,47 @@
 npm i blesmol-aggregation
 ```
 
+## Configuration
+
+`configure` Method
+
+This method is used to configure global settings for the application.
+
+**Parameters:**
+
+- settings: An object containing the configuration settings.
+
+  - translations: Translation settings.
+
+    - enabled (boolean, default: false): Enable or disable translations.
+
+    - defaultLang (string, default: "en"): Default language for translations.
+
+  - pagination: Pagination settings.
+
+    - defaultLimit (number, default: 25): Default limit for pagination.
+
+  - debug: Debug/logging settings.
+
+    - logQuery (boolean, default: false): Log the API query parameters.
+
+### Example
+
+```js
+const apiFeatures = require("../apiFeatures");
+
+apiFeatures.configure({
+  translations: {
+    enabled: false,
+    defaultLang: 'en'
+  },
+  pagination: {
+    defaultLimit: 10
+  }
+});
+```
+
+
 ## Usage
 
 ### Pagination with `paginate()`
@@ -157,13 +198,46 @@ Once the `$project` object is constructed, the function adds it to the aggregati
 ```bash
 GET /api/products?fields=-date;-description
 ```
+
 Date and description are removed
 
 ```bash
 GET /api/products?fields=date;description;price
 ```
+
 The function shows just this three fields.
+ i blesmol-aggregation
 
 ### Automatic mongoose model field validation
 
 An automatic feature has been implemented that may create unexpected behavior by removing invalid fields from the request query creating a clean string.
+
+## Development Guide
+
+### Scripts
+
+#### `npm run dev`
+
+- **Purpose**: Starts the development environment.
+- **Notes**: Ensure all required dependencies are installed (`npm install`)
+
+#### `npm run test`
+
+- **Purpose**: Runs all tests in the package using Jest.
+- **Notes**: Useful for verifying the functionality of the application.
+
+### Environment Setup
+
+#### `.env` File
+
+When developing locally, create a `.env` file in the root of the project with the following configuration:
+
+```env
+DB_URL=<your-mongodb-url>
+```
+
+- Replace `<your-mongodb-url>` with the actual URL of your MongoDB database.
+- This ensures the application can connect to the database during development.
+
+> The database is recreated each time the application is launched
+
