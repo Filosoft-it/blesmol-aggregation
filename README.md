@@ -8,6 +8,47 @@
 npm i blesmol-aggregation
 ```
 
+## Configuration
+
+`configure` Method
+
+This method is used to configure global settings for the application.
+
+**Parameters:**
+
+- settings: An object containing the configuration settings.
+
+  - translations: Translation settings.
+
+    - enabled (boolean, default: false): Enable or disable translations.
+
+    - defaultLang (string, default: "en"): Default language for translations.
+
+  - pagination: Pagination settings.
+
+    - defaultLimit (number, default: 25): Default limit for pagination.
+
+  - debug: Debug/logging settings.
+
+    - logQuery (boolean, default: false): Log the API query parameters.
+
+### Example
+
+```js
+const apiFeatures = require("../apiFeatures");
+
+apiFeatures.configure({
+  translations: {
+    enabled: false,
+    defaultLang: 'en'
+  },
+  pagination: {
+    defaultLimit: 10
+  }
+});
+```
+
+
 ## Usage
 
 ### Pagination with `paginate()`
