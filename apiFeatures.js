@@ -77,7 +77,7 @@ class APIfeatures {
     excludedFields.forEach((field) => delete queryObj[field]);
 
     // Convert the query object to a string and replace the gte, gt, lte, lt, ne with $gte, $gt, $lte, $lt, $ne
-    const queryStr = JSON.stringify(queryObj).replace(/\b(gte|gt|lte|lt|ne)\b/g, (match) => `$${match}`);
+    const queryStr = JSON.stringify(queryObj).replace(/\b(gte|gt|lte|lt|ne|in|nin)\b/g, (match) => `$${match}`);
 
     const translatableFields =
       global.apiFeatures.translations.enabled && this.model.getTranslateTableFields
@@ -88,10 +88,19 @@ class APIfeatures {
 
     const filterCriteria = [];
 
-    for (const field of Object.keys(parsedQueryStr)) {
+    for (let field of Object.keys(parsedQueryStr)) {
       // Skip the fields if is a populate field
-      if (this.queryString[field].p) {
+      if (this.queryString[field] && this.queryString[field].p) {
         continue;
+      }
+
+      const command = field.split(".").pop() || '';
+      let cleanedField = field;
+      let isUsingCommand = ["$lte", "$lt", "$gte", "$gt", "$ne", "$in", "$nin"].includes(
+        command
+      );
+      if (isUsingCommand) {
+        cleanedField = field.split(".").slice(0, -1).join(".");
       }
 
       var queryField = field;
@@ -111,10 +120,21 @@ class APIfeatures {
       }
 
       // Check if the field has [s] parameter, in that case we will use regex
-      const useRegex = Object.keys(parsedQueryStr[field]).includes('s');
+      let useRegex = false;
+      if (!isUsingCommand) {
+        useRegex = Object.keys(parsedQueryStr[field]).includes("s");
+      }
+
+      if (isUsingCommand && (command === "$in" || command === "$nin")) {
+        // Create the array by splitting the string by ";"
+        parsedQueryStr[field] = parsedQueryStr[field].split(";");
+      }
 
       // We will need to convert the fields to the correct type
-      if (this.model.schema.path(field) && this.model.schema.path(field).instance === 'Date') {
+      if (
+        this.model.schema.path(cleanedField) &&
+        this.model.schema.path(cleanedField).instance === "Date"
+      ) {
         if (parsedQueryStr[field] instanceof Object) {
           const keys = Object.keys(parsedQueryStr[field]);
 
@@ -125,46 +145,55 @@ class APIfeatures {
           parsedQueryStr[field] = new Date(parsedQueryStr[field]);
         }
         // TODO add escape for errors
-      } else if (this.model.schema.path(field) && this.model.schema.path(field).instance === 'Number') {
+      } else if (
+        this.model.schema.path(cleanedField) &&
+        this.model.schema.path(cleanedField).instance === "Number"
+      ) {
         // Convert the string to a number
         parsedQueryStr[field] = Number(parsedQueryStr[field]);
         // TODO add escape for errors
-      } else if (this.model.schema.path(field) && this.model.schema.path(field).instance === 'Boolean') {
+      } else if (
+        this.model.schema.path(cleanedField) &&
+        this.model.schema.path(cleanedField).instance === "Boolean"
+      ) {
         parsedQueryStr[field] = parsedQueryStr[field] === 'true';
         // TODO add escape for errors
       }
       const criteria = {};
+
+      let filter;
+      if (isUsingCommand) {
+        // if the field is using a command, we have .command at the end of the field, we need to transform it into [command]
+        filter = {
+          [command]: parsedQueryStr[field],
+        };
+        queryField = field.split(".").slice(0, -1).join(".");
+        fallbackQueryField = field.split(".").slice(0, -1).join(".");
+      } else {
+        filter = useRegex
+          ? {
+            $regex: parsedQueryStr[field].s,
+            $options: "i",
+          }
+          : parsedQueryStr[field];
+      }
+
       if (isTranslatable) {
         // in this case we will use the main language and the fallback language as match in or
         criteria.$match = {
           $or: [
             {
-              [queryField]: useRegex
-                ? {
-                    $regex: parsedQueryStr[field].s,
-                    $options: 'i'
-                  }
-                : parsedQueryStr[field]
+              [queryField]: filter,
             },
             {
-              [fallbackQueryField]: useRegex
-                ? {
-                    $regex: parsedQueryStr[field].s,
-                    $options: 'i'
-                  }
-                : parsedQueryStr[field]
-            }
-          ]
+              [fallbackQueryField]: filter,
+            },
+          ],
         };
       } else {
         // if it is not translatable, we match for the field directly
         criteria.$match = {
-          [queryField]: useRegex
-            ? {
-                $regex: parsedQueryStr[field].s,
-                $options: 'i'
-              }
-            : parsedQueryStr[field]
+          [queryField]: filter,
         };
       }
 

@@ -51,6 +51,19 @@ describe("API Tests", () => {
     expectedData.item11 = await Item.find({}).sort('-variant.color');
     expectedData.item12 = await Item.find({}).populate('variant.users', 'name');
     expectedData.item13 = await Item.find({ 'variant.size': 'Medium' }).populate('variant.users', 'name');
+    expectedData.item14 = await Item.find({ externalId: { $gt: 101 } });
+    expectedData.item15 = await Item.find({ externalId: { $ne: 101 } });
+    expectedData.item16 = await Item.find({ externalId: { $ne: 101 }, 'variant.size': 'Medium' });
+    expectedData.item17 = await Item.find({ name: 'Sample Item' });
+    expectedData.item18 = await Item.find({ externalId: { $lt: 50 } });
+    expectedData.item19 = await Item.find({ externalId: { $gt: 100 } }).sort('externalId');
+    expectedData.item20 = await Item.find({ category: 'Electronics' });
+    expectedData.item21 = await Item.find({ category: 'Electronics' }).limit(5);
+    expectedData.item22 = await Item.find({ category: 'Electronics' }).sort({ externalId: -1 });
+    expectedData.item23 = await Item.find({ name: { $in: ['Headphones', 'Laptop'] } });
+    expectedData.item24 = await Item.find({ name: { $nin: ['Smartphone'] } });
+    expectedData.item25 = await Item.find({ createAt: { $gte: new Date("2023-01-01T00:00:00.000Z") } });
+    expectedData.item26 = await Item.find({ updateAt: { $lte: new Date("2023-12-31T00:00:00.000Z") } });
   });
 
   afterAll(async () => {
@@ -175,6 +188,62 @@ describe("API Tests", () => {
         ['variant[size]=Medium', 'variant[users][p]=name'],
         expectedData.item13
       );
+    });
+
+    it('Should handle /items endpoint with params: externalId[gt]=101', async () => {
+      await testInstance.generateTest('/items', ['externalId[gt]=101'], expectedData.item14);
+    });
+
+    it('Should handle /items endpoint with params: externalId[ne]=101', async () => {
+      await testInstance.generateTest('/items', ['externalId[gt]=101'], expectedData.item15);
+    });
+
+    it('Should handle /items endpoint with params: externalId[ne]=101&variant[size]=Medium', async () => {
+      await testInstance.generateTest(
+        '/items',
+        ['externalId[ne]=101', 'variant[size]=Medium'],
+        expectedData.item16
+      );
+    });
+
+    it('Should handle /items endpoint with params: name=Sample Item', async () => {
+      await testInstance.generateTest('/items', ['name=Sample Item'], expectedData.item17);
+    });
+
+    it('Should handle /items endpoint with params: externalId[lt]=50', async () => {
+      await testInstance.generateTest('/items', ['externalId[lt]=50'], expectedData.item18);
+    });
+
+    it('Should handle /items endpoint with params: externalId[gt]=100&sort=externalId', async () => {
+      await testInstance.generateTest('/items', ['externalId[gt]=100', 'sort=externalId'], expectedData.item19);
+    });
+
+    it('Should handle /items endpoint with params: category=Electronics', async () => {
+      await testInstance.generateTest('/items', ['category=Electronics'], expectedData.item20);
+    });
+
+    it('Should handle /items endpoint with params: category=Electronics&limit=5', async () => {
+      await testInstance.generateTest('/items', ['category=Electronics', 'limit=5'], expectedData.item21);
+    });
+
+    it('Should handle /items endpoint with params: category=Electronics&sort=-externalId', async () => {
+      await testInstance.generateTest('/items', ['category=Electronics', 'sort=-externalId'], expectedData.item22);
+    });
+
+    it('Should handle /items endpoint with params: name[in]=Headphones;Laptop', async () => {
+      await testInstance.generateTest('/items', ['name[in]=Headphones;Laptop'], expectedData.item23);
+    });
+
+    it('Should handle /items endpoint with params: name[nin]=Smartphone', async () => {
+      await testInstance.generateTest('/items', ['name[nin]=Smartphone'], expectedData.item24);
+    });
+
+    it('Should handle /items endpoint with params: createAt[gte]=2023-01-01T00:00:00.000Z"', async () => {
+      await testInstance.generateTest('/items', ['createAt[gte]=2023-01-01T00:00:00.000Z'], expectedData.item25);
+    });
+
+    it('Should handle /items endpoint with params: updateAt[lte]=2023-12-31T00:00:00.000Z"', async () => {
+      await testInstance.generateTest('/items', ['updateAt[lte]=2023-12-31T00:00:00.000Z'], expectedData.item26);
     });
   });
 });
