@@ -420,6 +420,7 @@ class APIfeatures {
     return this; // Return the instance to allow method chaining
   }
 
+  // TODO: UNUSED?
   /** Count the number of documents that match the query */
   async count() {
     // Assuming `this.model` is your Mongoose model and `this.aggregateParams` contains the aggregation stages

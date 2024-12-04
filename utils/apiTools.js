@@ -22,10 +22,7 @@ const removeExtraFields = function (Model, params) {
 
     // Check if params as populate action
     if (params[param].p !== undefined) {
-      let firstField = param;
-      if (param.includes("->")) {
-        firstField = param.split("->")[0];
-      }
+      let firstField = param.split(".")[0];
 
       // Check if the first field is in the schema
       if (schema.includes(firstField)) {
@@ -39,8 +36,6 @@ const removeExtraFields = function (Model, params) {
       // If the param is in the schema, add it to the cleanedParams
       cleanedParams[param] = params[param];
       return;
-    } else if (schema.includes(param.split("->")[0])) {
-      cleanedParams[param] = params[param];
     }
   });
 
