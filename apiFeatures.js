@@ -68,6 +68,9 @@ class APIfeatures {
   static #formatConfiguration(rowSettings = {}) {
     const formattedConfig = {};
 
+    // Count settings
+    formattedConfig.enalbeTotalCount = rowSettings.enalbeTotalCount !== undefined ? enalbeTotalCount.enalbeTotalCount : true;
+
     // Fields to hide in the response
     formattedConfig.fieldsToHide = rowSettings.fieldsToHide || [];
 
@@ -636,10 +639,12 @@ class APIfeatures {
       {
         $facet: {
           documents: [...this.aggregatePipeline],
-          totalCount: [
-            ...this.aggregatePipeline.filter((stage) => !('$skip' in stage) && !('$limit' in stage)),
-            { $count: 'total' }
-          ]
+          ...(this.settings.enableTotalCount !== false && {
+            totalCount: [
+             ...this.aggregatePipeline.filter((stage) => !('$skip' in stage) && !('$limit' in stage)),
+              { $count: 'total' }
+            ]
+          })  
         }
       }
     ];
@@ -651,7 +656,7 @@ class APIfeatures {
     const result = await this.model.aggregate(this.facetedPipeline);
 
     const documents = result[0].documents;
-    const totalCount = result[0].totalCount?.[0]?.total ?? 0;
+    const totalCount = result[0].totalCount?.[0]?.total ?? null;
 
     return {
       documents,
