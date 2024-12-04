@@ -352,6 +352,22 @@ const result = await aggregation.exec()
 
 ## Features
 
+### Alternative parameter format for subdocuments support
+
+If in your project you want to avoid the frontend sending field.child as a parameter, you can use the field[child] format. This will be converted to the correct format in the BlesmolAggregation constructor.
+
+#### Example
+
+```bash
+GET /api/products?price[gte]=10&price[lte]=50&name[s]=phone&createdBy[name]=John
+```
+
+is equivalent to
+
+```bash
+GET /api/products?price[gte]=10&price[lte]=50&name[s]=phone&createdBy.name=John
+```
+
 ### Automatic mongoose model field validation
 
 An automatic feature has been implemented that may create unexpected behavior by removing invalid fields from the request query creating a clean string.
