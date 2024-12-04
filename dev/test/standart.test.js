@@ -176,6 +176,10 @@ describe("API Tests", () => {
       await testInstance.generateTest('/items', ['variant[color]=Yellow'], expectedData.item10);
     });
 
+    it('Should handle /items endpoint with params: variant.color=Yellow', async () => {
+      await testInstance.generateTest('/items', ['variant.color=Yellow'], expectedData.item10);
+    });
+
     it('Should handle /items endpoint with params: sort=-variant.color', async () => {
       await testInstance.generateTest('/items', ['sort=-variant.color'], expectedData.item11);
     });
@@ -184,10 +188,22 @@ describe("API Tests", () => {
       await testInstance.generateTest('/items', ['variant[users][p]=name'], expectedData.item12);
     });
 
+    it('Should handle /items endpoint with params: variant.users[p]=name', async () => {
+      await testInstance.generateTest('/items', ['variant.users[p]=name'], expectedData.item12);
+    });
+
     it('Should handle /items endpoint with params: variant[size]=Medium&variant[users][p]=name', async () => {
       await testInstance.generateTest(
         '/items',
         ['variant[size]=Medium', 'variant[users][p]=name'],
+        expectedData.item13
+      );
+    });
+
+    it('Should handle /items endpoint with params: variant.size=Medium&variant[users][p]=name', async () => {
+      await testInstance.generateTest(
+        '/items',
+        ['variant[size]=Medium', 'variant.users[p]=name'],
         expectedData.item13
       );
     });
@@ -204,6 +220,14 @@ describe("API Tests", () => {
       await testInstance.generateTest(
         '/items',
         ['externalId[ne]=101', 'variant[size]=Medium'],
+        expectedData.item16
+      );
+    });
+
+    it('Should handle /items endpoint with params: externalId[ne]=101&variant.size=Medium', async () => {
+      await testInstance.generateTest(
+        '/items',
+        ['externalId[ne]=101', 'variant.size=Medium'],
         expectedData.item16
       );
     });
