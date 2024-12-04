@@ -11,7 +11,17 @@ const testItems = [
       users: ['user1']
     },
     createAt: new Date('2023-11-01T10:00:00Z'),
-    updateAt: new Date('2023-11-10T10:00:00Z')
+    updateAt: new Date('2023-11-10T10:00:00Z'),
+    translations: {
+      it: {
+        name: 'Laptop',
+        description: 'Un laptop ad alte prestazioni per il gioco e il lavoro.'
+      },
+      en: {
+        name: 'Laptop',
+        description: 'A high-performance laptop for gaming and work.'
+      }
+    }
   },
   {
     _id: 'item2',
@@ -25,7 +35,17 @@ const testItems = [
       users: ['user1']
     },
     createAt: new Date('2023-11-02T11:00:00Z'),
-    updateAt: new Date('2023-11-12T11:00:00Z')
+    updateAt: new Date('2023-11-12T11:00:00Z'),
+    translations: {
+      it: {
+        name: 'Cuffie',
+        description: 'Cuffie over-ear con cancellazione del rumore.'
+      },
+      en: {
+        name: 'Headphones',
+        description: 'Noise-cancelling over-ear headphones.'
+      }
+    }
   },
   {
     _id: 'item3',
@@ -39,7 +59,17 @@ const testItems = [
       users: ['user1']
     },
     createAt: new Date('2023-11-03T12:00:00Z'),
-    updateAt: new Date('2023-11-13T12:00:00Z')
+    updateAt: new Date('2023-11-13T12:00:00Z'),
+    translations: {
+      it: {
+        name: 'Smartphone',
+        description: 'Ultimo modello di smartphone con funzionalità incredibili.'
+      },
+      en: {
+        name: 'Smartphone',
+        description: 'Latest model smartphone with amazing features.'
+      }
+    }
   }
 ];
 

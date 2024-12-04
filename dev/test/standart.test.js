@@ -64,6 +64,8 @@ describe("API Tests", () => {
     expectedData.item24 = await Item.find({ name: { $nin: ['Smartphone'] } });
     expectedData.item25 = await Item.find({ createAt: { $gte: new Date("2023-01-01T00:00:00.000Z") } });
     expectedData.item26 = await Item.find({ updateAt: { $lte: new Date("2023-12-31T00:00:00.000Z") } });
+    expectedData.customSettingItem1 = await Item.find({}).select('-name -createAt');
+    expectedData.customSettingItem2 = await Item.find({}).populate('users', '-name -createAt').select('-name -createAt');
   });
 
   afterAll(async () => {
@@ -79,7 +81,7 @@ describe("API Tests", () => {
     });
   });
 
-  describe('API Endpoints', () => {
+  describe('API Endpoints no configuration', () => {
     // Users
 
     it('Should handle /users endpoint', async () => {
@@ -245,5 +247,20 @@ describe("API Tests", () => {
     it('Should handle /items endpoint with params: updateAt[lte]=2023-12-31T00:00:00.000Z"', async () => {
       await testInstance.generateTest('/items', ['updateAt[lte]=2023-12-31T00:00:00.000Z'], expectedData.item26);
     });
+  });
+
+  describe('API Endpoints with custom settings', () => {
+    it('Should handle /custom-settings/items endpoint without params', async () => {
+      await testInstance.generateTest('/custom-settings/items', [], expectedData.customSettingItem1);
+    });
+
+    it('Should handle /custom-settings/items endpoint with params: users[p]=*', async () => {
+      await testInstance.generateTest('/custom-settings/items', ['users[p]=*'], expectedData.customSettingItem2);
+    });
+
+    // TODO: Need more testing for translations
+    // it('Should handle /custom-settings/items endpoint with params: limit=1&lang=it', async () => {
+    //   await testInstance.generateTest('/custom-settings/items', ['limit=1', 'lang=it'], expectedData.customSettingItem3);
+    // });
   });
 });

@@ -27,7 +27,7 @@
   },
   "files": [
     "index.js",
-    "apiTools.js",
+    "utils/",
     "apiFeatures.js",
     "LICENSE",
     "README.md",

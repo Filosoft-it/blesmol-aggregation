@@ -66,10 +66,15 @@ app.get('/items', async (req, res) => {
   }
 });
 
-app.get('/items', async (req, res) => {
+app.get('/custom-settings/items', async (req, res) => {
   try {
     const query = Item.find();
-    const features = new apiFeatures(query, req).search('name').filter().sort().limitFields().paginate().populate();
+    const features = new apiFeatures(query, req, {
+      fieldsToHide: ['name', 'createAt'],
+      debug: {
+        logQuery: true,
+      }
+    }).search('name').filter().sort().limitFields().paginate().populate();
 
     const results = await features.exec();
     const { documents, totalCount } = results;

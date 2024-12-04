@@ -9,7 +9,29 @@ logger.configure({
 });
 
 class APIfeatures {
-  constructor(query, req) {
+  /**
+   * Create a new APIfeatures instance.
+   * @param {object} query 
+   * @param {object} req 
+   * @param {Object | undefined} customSettings - The settings object.
+   * @param {object} customSettings - The settings object.
+   * @param {string[]} [customSettings.fieldsToHide] - Fields to hide in the response.
+   * @param {object} [customSettings.translations] - Translations settings.
+   * @param {boolean} [customSettings.translations.enabled=false] - Enable translations.
+   * @param {string} [customSettings.translations.defaultLang="en"] - Default language.
+   * @param {string[]} [customSettings.translations.availableLangs=["en"]] - Available languages.
+   * @param {object} [customSettings.pagination] - Pagination settings.
+   * @param {number} [customSettings.pagination.defaultLimit=25] - Default limit for pagination.
+   * @param {object} [customSettings.debug] - Debug/logging settings.
+   * @param {boolean} [customSettings.debug.logQuery=false] - Enable query logging.
+   */
+  constructor(query, req, customSettings = undefined) {
+    if (customSettings !== undefined) {
+      this.settings = APIfeatures.#formatConfiguration(customSettings);
+    } else {
+      this.settings = global.apiFeatures.settings;
+    }
+
     this.query = query;
     this.queryString = req.query;
 
@@ -18,7 +40,7 @@ class APIfeatures {
     if (req.query.lang !== undefined) {
       this.lang = req.query.lang;
     }
-    this.lang = this.lang || global.apiFeatures.translations.defaultLang;
+    this.lang = this.lang || this.settings.translations.defaultLang;
 
     //* AGGREGATE
     this.aggregatePipeline = [];
@@ -40,30 +62,37 @@ class APIfeatures {
    * @param {boolean} [settings.debug.logQuery=false] - Enable query logging.
    */
   static configure(settings = {}) {
-    global.apiFeatures = global.apiFeatures ? global.apiFeatures : {};
+    global.apiFeatures = { settings: APIfeatures.#formatConfiguration(settings) };
+  }
+
+  static #formatConfiguration(rowSettings = {}) {
+    const formattedConfig = {};
 
     // Fields to hide in the response
-    global.apiFeatures.fieldsToHide = settings.fieldsToHide || [];
+    formattedConfig.fieldsToHide = rowSettings.fieldsToHide || [];
 
     // Translations settings
-    global.apiFeatures.translations = global.apiFeatures.translations ? global.apiFeatures.translations : {};
-    global.apiFeatures.translations = {
-      enabled: settings.translations?.enabled || false,
-      defaultLang: settings.translations?.defaultLang || 'en'
+    formattedConfig.translations = formattedConfig.translations ? formattedConfig.translations : {};
+    formattedConfig.translations = {
+      enabled: rowSettings.translations?.enabled || false,
+      defaultLang: rowSettings.translations?.defaultLang || 'en'
     };
 
     // Pagination settings
-    global.apiFeatures.pagination = global.apiFeatures.pagination ? global.apiFeatures.pagination : {};
-    global.apiFeatures.pagination = {
-      defaultLimit: settings.pagination?.defaultLimit || 25
+    formattedConfig.pagination = formattedConfig.pagination ? formattedConfig.pagination : {};
+    formattedConfig.pagination = {
+      defaultLimit: rowSettings.pagination?.defaultLimit || 25
     };
 
     // Debug/logging settings
-    global.apiFeatures.debug = global.apiFeatures.debug ? global.apiFeatures.debug : {};
-    global.apiFeatures.debug = {
-      logQuery: settings.debug?.logQuery || false
+    formattedConfig.debug = formattedConfig.debug ? formattedConfig.debug : {};
+    formattedConfig.debug = {
+      logQuery: rowSettings.debug?.logQuery || false
     };
+
+    return formattedConfig;
   }
+
 
   /**
    * Filters the results based on the query string
@@ -80,7 +109,7 @@ class APIfeatures {
     const queryStr = JSON.stringify(queryObj).replace(/\b(gte|gt|lte|lt|ne|in|nin)\b/g, (match) => `$${match}`);
 
     const translatableFields =
-      global.apiFeatures.translations.enabled && this.model.getTranslateTableFields
+      this.settings.translations.enabled && this.model.getTranslateTableFields
         ? this.model.getTranslateTableFields()
         : null;
 
@@ -112,7 +141,7 @@ class APIfeatures {
         queryField = `translations.${this.lang}.${field}`;
 
         // if the language is different from default, we will use the default language as fallback
-        const defaultLang = global.apiFeatures.translations.defaultLang;
+        const defaultLang = this.settings.translations.defaultLang;
         if (this.lang != defaultLang) {
           // set as fallback the italian field
           fallbackQueryField = `translations.${defaultLang}.${field}`;
@@ -224,7 +253,7 @@ class APIfeatures {
 
     // Check if the model has translatable fields
     const translatableFields =
-      global.apiFeatures.translations.enabled && this.model.getTranslateTableFields
+      this.settings.translations.enabled && this.model.getTranslateTableFields
         ? this.model.getTranslateTableFields()
         : null;
 
@@ -298,6 +327,7 @@ class APIfeatures {
     return this;
   }
 
+  /** Sort the results based on the query string, e.g. ?sort=name,age */
   sort() {
     if (this.queryString.sort) {
       const sortField = this.queryString.sort.split(',');
@@ -326,6 +356,11 @@ class APIfeatures {
 
   // Limits the fields to be included in the query result.
   limitFields() {
+    const fieldsToHide = this.settings.fieldsToHide.reduce((acc, field) => {
+      acc[field] = 0;
+      return acc;
+    }, {});
+
     if (this.queryString.fields) {
       const fields = this.queryString.fields.split(';');
 
@@ -349,28 +384,33 @@ class APIfeatures {
         }
       });
 
-      if (global.apiFeatures.fieldsToHide.length > 0) {
+      if (Object.keys(fieldsToHide).length > 0) {
         this.aggregatePipeline.push({
           $project: {
             ...projectFields,
-            ...global.apiFeatures.fieldsToHide.reduce((acc, field) => {
-              acc[field] = 0;
-              return acc;
-            })
+            ...fieldsToHide
           }
         });
       } else {
         this.aggregatePipeline.push({ $project: projectFields });
+      }
+    } else {
+      if (Object.keys(fieldsToHide).length > 0) {
+        this.aggregatePipeline.push({
+          $project: {
+            ...fieldsToHide
+          }
+        });
       }
     }
 
     return this;
   }
 
-  // paginate the results, e.g. ?page=2&limit=10 aka handle skip and page stages
+  /** paginate the results, e.g. ?page=2&limit=10 aka handle skip and page stages */
   paginate() {
     const page = this.queryString.page * 1 || 1; // Convert to number with default 1
-    const limit = this.queryString.limit * 1 || global.apiFeatures.pagination.defaultLimit;
+    const limit = this.queryString.limit * 1 || this.settings.pagination.defaultLimit;
     const skip = limit * (page - 1); // Calculate the number of documents to skip
 
     // Push $skip and $limit stages to the aggregateParams array
@@ -380,7 +420,7 @@ class APIfeatures {
     return this; // Return the instance to allow method chaining
   }
 
-  // Count the number of documents that match the query
+  /** Count the number of documents that match the query */
   async count() {
     // Assuming `this.model` is your Mongoose model and `this.aggregateParams` contains the aggregation stages
     let pipeline = [...this.aggregatePipeline];
@@ -401,13 +441,14 @@ class APIfeatures {
 
   /**
    * Select fields and populate all the fields with "*" (e.g. ?userId[p]=*) or
-   * with the fields specified in the query string (e.g. ?userId[p]=name;surname)
+   * with the fields specified in the query string (e.g. ?userId[p]=name;surname).
    *
    *
-   * The select fields are separated by ";"
+   * The select fields are separated by ";".
    *
-   * To add non default field use + before the field name (e.g. ?userId[p]=+name;surname)
-   * To remove default field use - before the field name (e.g. ?userId[p]=-name;surname)
+   * To add non default field use + before the field name (e.g. ?userId[p]=+name;surname).
+   * 
+   * To remove default field use - before the field name (e.g. ?userId[p]=-name;surname).
    */
   populate() {
     const pipeline = [];
@@ -487,11 +528,11 @@ class APIfeatures {
         });
       }
 
-      if (global.apiFeatures.fieldsToHide.length > 0) {
+      if (this.settings.fieldsToHide.length > 0) {
         // @ts-ignore
         pipe.$lookup.pipeline.push({
           $project: {
-            ...global.apiFeature.fieldsToHide.reduce((acc, field) => {
+            ...this.settings.fieldsToHide.reduce((acc, field) => {
               acc[field] = 0;
               return acc;
             }, {})
@@ -507,12 +548,13 @@ class APIfeatures {
     return this;
   }
 
+  /** Add a custom stage to the aggregation pipeline */
   addStage(pipeline) {
     this.aggregatePipeline.push(pipeline);
     return this;
   }
 
-  orderSortStages() {
+  #orderSortStages() {
     let sortStages = this.aggregatePipeline.filter((stage) => '$sort' in stage);
     this.aggregatePipeline = this.aggregatePipeline.filter((stage) => !('$sort' in stage));
 
@@ -542,7 +584,7 @@ class APIfeatures {
     }
   }
 
-  movePaginationAndProjectionAtTheEnd() {
+  #movePaginationAndProjectionAtTheEnd() {
     const skipStage = this.aggregatePipeline.find((stage) => '$skip' in stage);
     const limitStage = this.aggregatePipeline.find((stage) => '$limit' in stage);
     if (skipStage && limitStage) {
@@ -560,7 +602,7 @@ class APIfeatures {
     }
   }
 
-  moveMatchStageAtStart() {
+  #moveMatchStageAtStart() {
     const matchStages = this.aggregatePipeline.filter((stage) => '$match' in stage);
     // merge in a single $match stage
     var matchStage = matchStages.reduce((acc, stage) => {
@@ -577,16 +619,16 @@ class APIfeatures {
     }
   }
 
-  orderStagesInPipeline() {
-    this.orderSortStages();
-    this.movePaginationAndProjectionAtTheEnd();
-    this.moveMatchStageAtStart();
+  #orderStagesInPipeline() {
+    this.#orderSortStages();
+    this.#movePaginationAndProjectionAtTheEnd();
+    this.#moveMatchStageAtStart();
   }
 
   // Prioritize, unitize and sort some stages
   // Then execute the query with aggregation pipeline.
   async exec() {
-    this.orderStagesInPipeline();
+    this.#orderStagesInPipeline();
 
     // Create a new facet pipeline to allow counting before pagination
     this.facetedPipeline = [
@@ -600,6 +642,10 @@ class APIfeatures {
         }
       }
     ];
+
+    if (this.settings.debug.logQuery) {
+      console.log(JSON.stringify(this.facetedPipeline, null, 2));
+    }
 
     const result = await this.model.aggregate(this.facetedPipeline);
 

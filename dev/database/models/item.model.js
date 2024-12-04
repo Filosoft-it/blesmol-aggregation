@@ -40,6 +40,11 @@ const itemsSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
+  translations: {
+    type: Object,
+    required: true,
+    default: {}
+  },
   createAt: {
     type: Date,
     default: Date.now
@@ -49,6 +54,14 @@ const itemsSchema = new mongoose.Schema({
     default: Date.now
   }
 });
+
+// @ts-ignore
+itemsSchema.statics.getTranslateTableFields = () => {
+  return {
+    name: "String",
+    description: "String",
+  }
+};
 
 const ItemsModel = mongoose.model("Item", itemsSchema);
 module.exports = ItemsModel;
