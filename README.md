@@ -66,13 +66,20 @@ Create a new instance, add required functions
 
 ```javascript
 const query = await Item.find();
-const search = new BlesmolAggregation(query, req).search("title;description").filter().sort().limitFields().populate().paginate().addStage(customStage);
+const aggregation = new BlesmolAggregation(query, req)
+                    .search("title;description")
+                    .filter()
+                    .sort()
+                    .limitFields()
+                    .populate()
+                    .paginate()
+                    .addStage(customStage);
 ```
 
 Execute the query
 
 ```javascript
-const result = await search.exec();
+const result = await aggregation.exec();
 ```
 
 #### Results:
@@ -95,8 +102,8 @@ It is possible to search for a specific string on specific fields by adding .sea
 ```javascript
 const query = await Item.find();
 req.query.search = "stone";
-const search = new BlesmolAggregation(query, req).search("title;content");
-const result = await search.exec()
+const aggregation = new BlesmolAggregation(query, req).search("title;content");
+const result = await aggregation.exec()
 ```
 
 #### Result:
@@ -225,8 +232,8 @@ It is possible to request the population of specific fields and also to receive 
 ```javascript
 const query = await Item.find();
 req.query.createdBy = { p: "name,email"}
-const search = new BlesmolAggregation(query, req).populate();
-const result = await search.exec()
+const aggregation = new BlesmolAggregation(query, req).populate();
+const result = await aggregation.exec()
 ```
 
 #### Result:
@@ -252,8 +259,8 @@ const query = await Item.find();
 req.query.createdBy = {
     p: "*"
 }
-const search = new BlesmolAggregation(query, req).populate();
-const result = await search.exec()
+const aggregation = new BlesmolAggregation(query, req).populate();
+const result = await aggregation.exec()
 ```
 
 #### Result:
@@ -303,14 +310,12 @@ GET /api/items?page=3&limit=10
 #### Example
 
 ```javascript
-const APIfeatures = require("apifeatures-test");
-
-const features = new APIfeatures(query, req)
+const aggregation = new BlesmolAggregation(query, req)
     .filter()
     .sort()
     .paginate()
 
-const results = await features.exec();
+const results = await aggregation.exec();
 ```
 
 ### addStage to the pipeline with `addStage()`
@@ -321,12 +326,16 @@ It is possible to add custom aggregation stages with the addStage function.
 
 ```javascript
 const query = await Item.find();
-const search = new BlesmolAggregation(query, req).filter().sort().paginate().addStage({
-    $match: {
-        title: "Stone"
-    }
-});
-const result = await search.exec()
+const aggregation = new BlesmolAggregation(query, req)
+                        .filter()
+                        .sort()
+                        .paginate()
+                        .addStage({
+                            $match: {
+                                title: "Stone"
+                            }
+                        });
+const result = await aggregation.exec()
 ```
 
 #### Result:
@@ -358,7 +367,10 @@ the function checks the length of the array that is returned by the `$count` pha
 #### Example
 
 ```javascript
-const items = new BlesmolAggregation(Item.find(), req).filter().sort().paginate();
-const results = await items.exec();
+const aggregation = new BlesmolAggregation(Item.find(), req)
+                    .filter()
+                    .sort()
+                    paginate();
+const results = await aggregation.exec();
 const count = results.totalCount();
 ```
