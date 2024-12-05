@@ -1,6 +1,6 @@
 {
   "name": "blesmol-aggregation",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "main": "apiFeatures.js",
   "scripts": {
     "test": "cross-env NODE_ENV=test jest dev/test --detectOpenHandles",
