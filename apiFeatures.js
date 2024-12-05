@@ -11,8 +11,8 @@ logger.configure({
 class APIfeatures {
   /**
    * Create a new APIfeatures instance.
-   * @param {object} query 
-   * @param {object} req 
+   * @param {object} query
+   * @param {object} req
    * @param {Object | undefined} customSettings - The settings object.
    * @param {object} customSettings - The settings object.
    * @param {string[]} [customSettings.fieldsToHide] - Fields to hide in the response.
@@ -51,6 +51,7 @@ class APIfeatures {
   /**
    * Configures global settings for the application.
    * @param {Object} settings - The settings object.
+   * @param {boolean} [settings.enableTotalCount] - Enable total count in the response.
    * @param {string[]} [settings.fieldsToHide] - Fields to hide in the response.
    * @param {Object} [settings.translations] - Translations settings.
    * @param {boolean} [settings.translations.enabled=false] - Enable translations.
@@ -69,7 +70,7 @@ class APIfeatures {
     const formattedConfig = {};
 
     // Count settings
-    formattedConfig.enalbeTotalCount = rowSettings.enalbeTotalCount !== undefined ? enalbeTotalCount.enalbeTotalCount : true;
+    formattedConfig.enableTotalCount = rowSettings.enableTotalCount !== undefined ? rowSettings.enableTotalCount : true;
 
     // Fields to hide in the response
     formattedConfig.fieldsToHide = rowSettings.fieldsToHide || [];
@@ -95,7 +96,6 @@ class APIfeatures {
 
     return formattedConfig;
   }
-
 
   /**
    * Filters the results based on the query string
@@ -126,13 +126,11 @@ class APIfeatures {
         continue;
       }
 
-      const command = field.split(".").pop() || '';
+      const command = field.split('.').pop() || '';
       let cleanedField = field;
-      let isUsingCommand = ["$lte", "$lt", "$gte", "$gt", "$ne", "$in", "$nin"].includes(
-        command
-      );
+      let isUsingCommand = ['$lte', '$lt', '$gte', '$gt', '$ne', '$in', '$nin'].includes(command);
       if (isUsingCommand) {
-        cleanedField = field.split(".").slice(0, -1).join(".");
+        cleanedField = field.split('.').slice(0, -1).join('.');
       }
 
       var queryField = field;
@@ -154,19 +152,16 @@ class APIfeatures {
       // Check if the field has [s] parameter, in that case we will use regex
       let useRegex = false;
       if (!isUsingCommand) {
-        useRegex = Object.keys(parsedQueryStr[field]).includes("s");
+        useRegex = Object.keys(parsedQueryStr[field]).includes('s');
       }
 
-      if (isUsingCommand && (command === "$in" || command === "$nin")) {
+      if (isUsingCommand && (command === '$in' || command === '$nin')) {
         // Create the array by splitting the string by ";"
-        parsedQueryStr[field] = parsedQueryStr[field].split(";");
+        parsedQueryStr[field] = parsedQueryStr[field].split(';');
       }
 
       // We will need to convert the fields to the correct type
-      if (
-        this.model.schema.path(cleanedField) &&
-        this.model.schema.path(cleanedField).instance === "Date"
-      ) {
+      if (this.model.schema.path(cleanedField) && this.model.schema.path(cleanedField).instance === 'Date') {
         if (parsedQueryStr[field] instanceof Object) {
           const keys = Object.keys(parsedQueryStr[field]);
 
@@ -177,17 +172,11 @@ class APIfeatures {
           parsedQueryStr[field] = new Date(parsedQueryStr[field]);
         }
         // TODO add escape for errors
-      } else if (
-        this.model.schema.path(cleanedField) &&
-        this.model.schema.path(cleanedField).instance === "Number"
-      ) {
+      } else if (this.model.schema.path(cleanedField) && this.model.schema.path(cleanedField).instance === 'Number') {
         // Convert the string to a number
         parsedQueryStr[field] = Number(parsedQueryStr[field]);
         // TODO add escape for errors
-      } else if (
-        this.model.schema.path(cleanedField) &&
-        this.model.schema.path(cleanedField).instance === "Boolean"
-      ) {
+      } else if (this.model.schema.path(cleanedField) && this.model.schema.path(cleanedField).instance === 'Boolean') {
         parsedQueryStr[field] = parsedQueryStr[field] === 'true';
         // TODO add escape for errors
       }
@@ -197,16 +186,16 @@ class APIfeatures {
       if (isUsingCommand) {
         // if the field is using a command, we have .command at the end of the field, we need to transform it into [command]
         filter = {
-          [command]: parsedQueryStr[field],
+          [command]: parsedQueryStr[field]
         };
-        queryField = field.split(".").slice(0, -1).join(".");
-        fallbackQueryField = field.split(".").slice(0, -1).join(".");
+        queryField = field.split('.').slice(0, -1).join('.');
+        fallbackQueryField = field.split('.').slice(0, -1).join('.');
       } else {
         filter = useRegex
           ? {
-            $regex: parsedQueryStr[field].s,
-            $options: "i",
-          }
+              $regex: parsedQueryStr[field].s,
+              $options: 'i'
+            }
           : parsedQueryStr[field];
       }
 
@@ -215,17 +204,17 @@ class APIfeatures {
         criteria.$match = {
           $or: [
             {
-              [queryField]: filter,
+              [queryField]: filter
             },
             {
-              [fallbackQueryField]: filter,
-            },
-          ],
+              [fallbackQueryField]: filter
+            }
+          ]
         };
       } else {
         // if it is not translatable, we match for the field directly
         criteria.$match = {
-          [queryField]: filter,
+          [queryField]: filter
         };
       }
 
@@ -451,7 +440,7 @@ class APIfeatures {
    * The select fields are separated by ";".
    *
    * To add non default field use + before the field name (e.g. ?userId[p]=+name;surname).
-   * 
+   *
    * To remove default field use - before the field name (e.g. ?userId[p]=-name;surname).
    */
   populate() {
@@ -641,10 +630,10 @@ class APIfeatures {
           documents: [...this.aggregatePipeline],
           ...(this.settings.enableTotalCount !== false && {
             totalCount: [
-             ...this.aggregatePipeline.filter((stage) => !('$skip' in stage) && !('$limit' in stage)),
+              ...this.aggregatePipeline.filter((stage) => !('$skip' in stage) && !('$limit' in stage)),
               { $count: 'total' }
             ]
-          })  
+          })
         }
       }
     ];
