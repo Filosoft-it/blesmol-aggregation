@@ -1,5 +1,10 @@
 # blesmol-aggregation
 
+![NPM Version](https://img.shields.io/npm/v/blesmol-aggregation?style=flat-square)
+![NPM License](https://img.shields.io/npm/l/blesmol-aggregation?style=flat-square)
+![NPM Downloads](https://img.shields.io/npm/dw/blesmol-aggregation?style=flat-square)
+
+
 If you are looking to maintain this module, please refer to the [Development Guide](https://github.com/Filosoft-it/blesmol-aggregation/blob/main/docs/dev-guide.md).
 
 ## Description
