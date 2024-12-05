@@ -1,6 +1,6 @@
 # blesmol-aggregation
 
-If you are looking to maintain this module, please refer to the [Development Guide](docs/dev-guide.md).
+If you are looking to maintain this module, please refer to the [Development Guide](https://github.com/Filosoft-it/blesmol-aggregation/blob/main/docs/dev-guide.md).
 
 ## Description
 

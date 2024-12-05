@@ -10,7 +10,18 @@
   "jest": {
     "testEnvironment": "node"
   },
-  "keywords": [],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/whatar/lorikeet-logger.git"
+  },
+  "keywords": [
+    "aggregation",
+    "mongoose",
+    "mongodb",
+    "express",
+    "middleware",
+    "api"
+  ],
   "author": "",
   "license": "MIT",
   "description": "",
