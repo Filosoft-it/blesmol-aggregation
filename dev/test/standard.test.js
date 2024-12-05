@@ -75,7 +75,12 @@ describe('API Tests', () => {
     })
       .limit(1)
       .select('-name -createAt');
-    expectedData.customSettingItem4 = await Item.find({}).select('-name -createAt');
+    expectedData.customSettingItem4 = await await Item.find({
+      'translations.en.description': 'Noise-cancelling over-ear headphones'
+    })
+      .limit(1)
+      .select('-name -createAt');
+    expectedData.customSettingItem5 = await Item.find({}).select('-name -createAt');
   });
 
   afterAll(async () => {
@@ -294,16 +299,24 @@ describe('API Tests', () => {
       await testInstance.generateTest('/custom-settings/items', ['users[p]=*'], expectedData.customSettingItem2);
     });
 
-    it('Should handle /custom-settings/items endpoint with params: limit=1&lang=it', async () => {
-      const results = await testInstance.generateTest(
+    it('Should handle /custom-settings/items endpoint with params: limit=1&lang=it&description=Cuffie over-ear con cancellazione del rumore', async () => {
+      await testInstance.generateTest(
         '/custom-settings/items',
         ['limit=1', 'lang=it', 'description=Cuffie over-ear con cancellazione del rumore'],
         expectedData.customSettingItem3
       );
     });
 
+    it('Should handle /custom-settings/items endpoint with params: limit=1&lang=de&description=Noise-cancelling over-ear headphones', async () => {
+      await testInstance.generateTest(
+        '/custom-settings/items',
+        ['limit=1', 'lang=de', 'description=Noise-cancelling over-ear headphones'],
+        expectedData.customSettingItem4
+      );
+    });
+
     it('Should handle /custom-settings/items endpoint with params: (Check if the body.results is null)', async () => {
-      const results = await testInstance.generateTest('/custom-settings/items', [''], expectedData.customSettingItem4);
+      const results = await testInstance.generateTest('/custom-settings/items', [''], expectedData.customSettingItem5);
       if (results.body.results !== null) {
         throw new Error('results.body.results should be null');
       }
