@@ -72,9 +72,16 @@ app.get('/custom-settings/items', async (req, res) => {
     const features = new apiFeatures(query, req, {
       fieldsToHide: ['name', 'createAt'],
       debug: {
-        logQuery: true,
-      }
-    }).search('name').filter().sort().limitFields().paginate().populate();
+        logQuery: true
+      },
+      enableTotalCount: false
+    })
+      .search('name')
+      .filter()
+      .sort()
+      .limitFields()
+      .paginate()
+      .populate();
 
     const results = await features.exec();
     const { documents, totalCount } = results;

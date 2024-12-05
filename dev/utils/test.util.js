@@ -34,6 +34,7 @@ class Test {
             throw error;
           } else {
             this.#compareResponse(res.body, expectedData);
+            return res;
           }
         }.bind(this)
       )

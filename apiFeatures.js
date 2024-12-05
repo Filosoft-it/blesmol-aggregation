@@ -15,6 +15,7 @@ class APIfeatures {
    * @param {object} req
    * @param {Object | undefined} customSettings - The settings object.
    * @param {object} customSettings - The settings object.
+   * @param {boolean} [customSettings.enableTotalCount] - Enable total count in the response.
    * @param {string[]} [customSettings.fieldsToHide] - Fields to hide in the response.
    * @param {object} [customSettings.translations] - Translations settings.
    * @param {boolean} [customSettings.translations.enabled=false] - Enable translations.
@@ -322,7 +323,7 @@ class APIfeatures {
   /** Sort the results based on the query string, e.g. ?sort=name,age */
   sort() {
     if (this.queryString.sort) {
-      const sortField = this.queryString.sort.split(',');
+      const sortField = this.queryString.sort.split(';');
 
       // Create the sort object
       let aggregateParam = {};

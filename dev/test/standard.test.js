@@ -1,18 +1,18 @@
-const request = require("supertest");
-const serverApp = require("../index_dev"); // Import the app instance for testing
+const request = require('supertest');
+const serverApp = require('../index_dev'); // Import the app instance for testing
 
 // Database and models
-const database = require("../database/db");
-const User = require("../database/models/user.model");
-const Item = require("../database/models/item.model");
+const database = require('../database/db');
+const User = require('../database/models/user.model');
+const Item = require('../database/models/item.model');
 
 // Utils
-const Test = require("../utils/test.util");
+const Test = require('../utils/test.util');
 
 const app = serverApp.app;
 
 // Main test suite
-describe("API Tests", () => {
+describe('API Tests', () => {
   let testInstance;
   let expectedData = {};
 
@@ -37,6 +37,8 @@ describe("API Tests", () => {
     expectedData.user11 = await User.find({
       $or: [{ name: { $regex: 'example1', $options: 'i' } }, { email: { $regex: 'example1', $options: 'i' } }]
     });
+    expectedData.user12 = await User.find({}).sort('name email');
+    expectedData.user13 = await User.find({}).sort({ name: 1, email: -1 });
 
     expectedData.item1 = await Item.find({});
     expectedData.item2 = await Item.find({}).populate('users');
@@ -62,10 +64,18 @@ describe("API Tests", () => {
     expectedData.item22 = await Item.find({ category: 'Electronics' }).sort({ externalId: -1 });
     expectedData.item23 = await Item.find({ name: { $in: ['Headphones', 'Laptop'] } });
     expectedData.item24 = await Item.find({ name: { $nin: ['Smartphone'] } });
-    expectedData.item25 = await Item.find({ createAt: { $gte: new Date("2023-01-01T00:00:00.000Z") } });
-    expectedData.item26 = await Item.find({ updateAt: { $lte: new Date("2023-12-31T00:00:00.000Z") } });
+    expectedData.item25 = await Item.find({ createAt: { $gte: new Date('2023-01-01T00:00:00.000Z') } });
+    expectedData.item26 = await Item.find({ updateAt: { $lte: new Date('2023-12-31T00:00:00.000Z') } });
     expectedData.customSettingItem1 = await Item.find({}).select('-name -createAt');
-    expectedData.customSettingItem2 = await Item.find({}).populate('users', '-name -createAt').select('-name -createAt');
+    expectedData.customSettingItem2 = await Item.find({})
+      .populate('users', '-name -createAt')
+      .select('-name -createAt');
+    expectedData.customSettingItem3 = await await Item.find({
+      'translations.it.description': 'Cuffie over-ear con cancellazione del rumore'
+    })
+      .limit(1)
+      .select('-name -createAt');
+    expectedData.customSettingItem4 = await Item.find({}).select('-name -createAt');
   });
 
   afterAll(async () => {
@@ -126,6 +136,13 @@ describe("API Tests", () => {
 
     it('Should handle /users endpoint with params: search=example1', async () => {
       await testInstance.generateTest('/users', ['search=example1'], expectedData.user11);
+    });
+
+    it('Should handle /users endpoint with params: sort=name;email', async () => {
+      await testInstance.generateTest('/users', ['sort=name;email'], expectedData.user12);
+    });
+    it('Should handle /users endpoint with params: sort=name;-email', async () => {
+      await testInstance.generateTest('/users', ['sort=name;-email'], expectedData.user13);
     });
 
     // Items
@@ -201,11 +218,7 @@ describe("API Tests", () => {
     });
 
     it('Should handle /items endpoint with params: variant.size=Medium&variant.users[p]=name', async () => {
-      await testInstance.generateTest(
-        '/items',
-        ['variant[size]=Medium', 'variant.users[p]=name'],
-        expectedData.item13
-      );
+      await testInstance.generateTest('/items', ['variant[size]=Medium', 'variant.users[p]=name'], expectedData.item13);
     });
 
     it('Should handle /items endpoint with params: externalId[gt]=101', async () => {
@@ -217,19 +230,11 @@ describe("API Tests", () => {
     });
 
     it('Should handle /items endpoint with params: externalId[ne]=101&variant[size]=Medium', async () => {
-      await testInstance.generateTest(
-        '/items',
-        ['externalId[ne]=101', 'variant[size]=Medium'],
-        expectedData.item16
-      );
+      await testInstance.generateTest('/items', ['externalId[ne]=101', 'variant[size]=Medium'], expectedData.item16);
     });
 
     it('Should handle /items endpoint with params: externalId[ne]=101&variant.size=Medium', async () => {
-      await testInstance.generateTest(
-        '/items',
-        ['externalId[ne]=101', 'variant.size=Medium'],
-        expectedData.item16
-      );
+      await testInstance.generateTest('/items', ['externalId[ne]=101', 'variant.size=Medium'], expectedData.item16);
     });
 
     it('Should handle /items endpoint with params: name=Sample Item', async () => {
@@ -268,8 +273,15 @@ describe("API Tests", () => {
       await testInstance.generateTest('/items', ['createAt[gte]=2023-01-01T00:00:00.000Z'], expectedData.item25);
     });
 
-    it('Should handle /items endpoint with params: updateAt[lte]=2023-12-31T00:00:00.000Z"', async () => {
-      await testInstance.generateTest('/items', ['updateAt[lte]=2023-12-31T00:00:00.000Z'], expectedData.item26);
+    it('Should handle /items endpoint with params: updateAt[lte]=2023-12-31T00:00:00.000Z (Check if the body.data.length is a number)', async () => {
+      const results = await testInstance.generateTest(
+        '/items',
+        ['updateAt[lte]=2023-12-31T00:00:00.000Z'],
+        expectedData.item26
+      );
+      if (typeof results.body.data.length !== 'number') {
+        throw new Error('results.body.data.length should be a number');
+      }
     });
   });
 
@@ -282,9 +294,19 @@ describe("API Tests", () => {
       await testInstance.generateTest('/custom-settings/items', ['users[p]=*'], expectedData.customSettingItem2);
     });
 
-    // TODO: Need more testing for translations
-    // it('Should handle /custom-settings/items endpoint with params: limit=1&lang=it', async () => {
-    //   await testInstance.generateTest('/custom-settings/items', ['limit=1', 'lang=it'], expectedData.customSettingItem3);
-    // });
+    it('Should handle /custom-settings/items endpoint with params: limit=1&lang=it', async () => {
+      const results = await testInstance.generateTest(
+        '/custom-settings/items',
+        ['limit=1', 'lang=it', 'description=Cuffie over-ear con cancellazione del rumore'],
+        expectedData.customSettingItem3
+      );
+    });
+
+    it('Should handle /custom-settings/items endpoint with params: (Check if the body.results is null)', async () => {
+      const results = await testInstance.generateTest('/custom-settings/items', [''], expectedData.customSettingItem4);
+      if (results.body.results !== null) {
+        throw new Error('results.body.results should be null');
+      }
+    });
   });
 });
