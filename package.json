@@ -4,7 +4,7 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "tsc",
+    "build": "rimraf ./dist --glob && tsc",
     "test": "cross-env NODE_ENV=test jest dev/test --detectOpenHandles",
     "dev": "ts-node-dev --project ./tsconfig.json --respawn ./dev/index_dev.js",
     "prepublishOnly": "npm install && npm run build && npm run test"
@@ -37,6 +37,7 @@
     "cross-env": "^7.0.3",
     "express": "^4.21.1",
     "jest": "^29.7.0",
+    "rimraf": "^6.0.1",
     "supertest": "^7.0.0",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.7.2"
