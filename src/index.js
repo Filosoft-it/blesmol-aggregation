@@ -194,9 +194,9 @@ class APIfeatures {
       } else {
         filter = useRegex
           ? {
-              $regex: parsedQueryStr[field].s,
-              $options: 'i'
-            }
+            $regex: parsedQueryStr[field].s,
+            $options: 'i'
+          }
           : parsedQueryStr[field];
       }
 

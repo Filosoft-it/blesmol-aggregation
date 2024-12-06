@@ -3,7 +3,7 @@ const express = require("express");
 const database = require("./database/db");
 const User = require("./database/models/user.model");
 const Item = require("./database/models/item.model");
-const apiFeatures = require("../apiFeatures");
+const apiFeatures = require("../src/index");
 
 const app = express();
 let server = null;
