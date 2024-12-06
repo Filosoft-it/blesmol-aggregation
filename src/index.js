@@ -1,5 +1,8 @@
-const apiTools = require("./utils/apiTools");
 const logger = require("lorikeet-logger");
+const { Request } = require("express");
+
+// Utils
+const apiTools = require("./utils/api-tools.utils");
 
 const mongoose = require("mongoose");
 
@@ -12,9 +15,8 @@ class APIfeatures {
   /**
    * Create a new APIfeatures instance.
    * @param {object} query
-   * @param {object} req
-   * @param {Object | undefined} customSettings - The settings object.
-   * @param {object} customSettings - The settings object.
+   * @param {Request} req
+   * @param {Object} [customSettings] - The settings object.
    * @param {boolean} [customSettings.enableTotalCount] - Enable total count in the response.
    * @param {string[]} [customSettings.fieldsToHide] - Fields to hide in the response.
    * @param {object} [customSettings.translations] - Translations settings.
@@ -54,13 +56,13 @@ class APIfeatures {
    * @param {Object} settings - The settings object.
    * @param {boolean} [settings.enableTotalCount] - Enable total count in the response.
    * @param {string[]} [settings.fieldsToHide] - Fields to hide in the response.
-   * @param {Object} [settings.translations] - Translations settings.
+   * @param {object} [settings.translations] - Translations settings.
    * @param {boolean} [settings.translations.enabled=false] - Enable translations.
    * @param {string} [settings.translations.defaultLang="en"] - Default language.
    * @param {string[]} [settings.translations.availableLangs=["en"]] - Available languages.
-   * @param {Object} [settings.pagination] - Pagination settings.
+   * @param {object} [settings.pagination] - Pagination settings.
    * @param {number} [settings.pagination.defaultLimit=25] - Default limit for pagination.
-   * @param {Object} [settings.debug] - Debug/logging settings.
+   * @param {object} [settings.debug] - Debug/logging settings.
    * @param {boolean} [settings.debug.logQuery=false] - Enable query logging.
    */
   static configure(settings = {}) {
@@ -228,7 +230,8 @@ class APIfeatures {
   }
 
   /**
-   * Search the fields in the model with the search parameter, using regex and ; as separator
+   * Search the fields in the model with the search parameter
+   * @param {string} [fields] - The fields to search in, separated by ";"
    */
   search(fields) {
     // Check if the search parameter is present
@@ -347,7 +350,7 @@ class APIfeatures {
     return this;
   }
 
-  // Limits the fields to be included in the query result.
+  /** Limits the fields to be included in the query result. */
   limitFields() {
     const fieldsToHide = this.settings.fieldsToHide.reduce((acc, field) => {
       acc[field] = 0;
@@ -436,7 +439,6 @@ class APIfeatures {
   /**
    * Select fields and populate all the fields with "*" (e.g. ?userId[p]=*) or
    * with the fields specified in the query string (e.g. ?userId[p]=name;surname).
-   *
    *
    * The select fields are separated by ";".
    *
@@ -542,7 +544,11 @@ class APIfeatures {
     return this;
   }
 
-  /** Add a custom stage to the aggregation pipeline */
+  /**
+   * Add a custom stage to the aggregation pipeline
+   * @param {Object} pipeline - The stage to add to the pipeline
+   * @returns {APIfeatures} - The instance to allow method chaining
+   */
   addStage(pipeline) {
     this.aggregatePipeline.push(pipeline);
     return this;
@@ -619,8 +625,10 @@ class APIfeatures {
     this.#moveMatchStageAtStart();
   }
 
-  // Prioritize, unitize and sort some stages
-  // Then execute the query with aggregation pipeline.
+  /** 
+   * Then execute the query with aggregation pipeline. 
+    * @returns {Promise<{documents: any[], totalCount: number | null}>} - The documents and the total count.
+   * */
   async exec() {
     this.#orderStagesInPipeline();
 
@@ -657,6 +665,5 @@ class APIfeatures {
 
 // Set the default configuration settings
 APIfeatures.configure();
-
 
 module.exports = APIfeatures
