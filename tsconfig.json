@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "declaration": true,        // Generate declaration files
+    "declarationDir": "./types", // Output directory for declaration files
+    "emitDeclarationOnly": false, // Generate both JS and .d.ts files (set to true for only .d.ts files)
+    "outDir": "./dist",         // Output directory for compiled files
+    "allowJs": true,            // Include JavaScript files in the project
+    "checkJs": false,           // Do not type-check JavaScript files
+    "rootDir": "./src",         // Root directory for source files
+    "strict": true,             // Enable strict type-checking
+    "sourceMap": false,         // Do not generate source maps
+  },
+  "include": ["./src/**/*"],
+  "exclude": ["node_modules"]
+}
