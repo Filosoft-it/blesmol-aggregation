@@ -239,6 +239,14 @@ class APIfeatures {
       return this;
     }
 
+    let relevanceOrder = null
+
+    if (this.queryString.sort && this.queryString.sort.includes('-relevance')) {
+      relevanceOrder = -1
+    } else if (this.queryString.sort && this.queryString.sort.includes('relevance')) {
+      relevanceOrder = 1
+    }
+
     // Check if all the fields are String
     const fieldsType = 'String';
     for (const field of fields.split(';')) {
@@ -319,6 +327,10 @@ class APIfeatures {
     ];
 
     this.aggregatePipeline.push(...aggregateParams);
+
+    if (relevanceOrder) {
+      this.aggregatePipeline.push({ $sort: { relevance: relevanceOrder } });
+    }
 
     return this;
   }
