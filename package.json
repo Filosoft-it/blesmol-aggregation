@@ -1,6 +1,7 @@
 {
   "name": "blesmol-aggregation",
-  "version": "0.1.5",
+  "description": "Functions to handle MongoDB queries using Mongoose",
+  "version": "0.1.6",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -26,7 +27,6 @@
   ],
   "author": "",
   "license": "MIT",
-  "description": "",
   "dependencies": {
     "lorikeet-logger": "^1.1.3",
     "mongoose": "^8.8.3"
