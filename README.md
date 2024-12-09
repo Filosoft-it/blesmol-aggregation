@@ -4,7 +4,6 @@
 ![NPM License](https://img.shields.io/npm/l/blesmol-aggregation?style=flat-square)
 ![NPM Downloads](https://img.shields.io/npm/dw/blesmol-aggregation?style=flat-square)
 
-
 If you are looking to maintain this module, please refer to the [Development Guide](https://github.com/Filosoft-it/blesmol-aggregation/blob/main/docs/dev-guide.md).
 
 ## Description
@@ -28,6 +27,7 @@ This method is used to configure global settings for the application.
 **Parameters:**
 
 - settings: An object containing the configuration settings.
+
   - fieldsToHide (default: none): Fields to hide in to results: (like password, token, ecc.)
 
   - translations: Translation settings.
@@ -47,7 +47,7 @@ This method is used to configure global settings for the application.
 ### Example
 
 ```js
-const apiFeatures = require("../apiFeatures");
+const apiFeatures = require('../apiFeatures');
 
 apiFeatures.configure({
   translations: {
@@ -65,7 +65,7 @@ apiFeatures.configure({
 Import the module
 
 ```javascript
-const BlesmolAggregation = require("blesmol-aggregation");
+const BlesmolAggregation = require('blesmol-aggregation');
 ```
 
 Create a new instance, add required functions
@@ -73,13 +73,13 @@ Create a new instance, add required functions
 ```javascript
 const query = await Item.find();
 const aggregation = new BlesmolAggregation(query, req)
-                    .search("title;description")
-                    .filter()
-                    .sort()
-                    .limitFields()
-                    .populate()
-                    .paginate()
-                    .addStage(customStage);
+  .search('title;description')
+  .filter()
+  .sort()
+  .limitFields()
+  .populate()
+  .paginate()
+  .addStage(customStage);
 ```
 
 Execute the query
@@ -111,35 +111,35 @@ The search is case insensitive.
 
 ```javascript
 const query = await Item.find();
-req.query.search = "stone";
-const aggregation = new BlesmolAggregation(query, req).search("title;content");
-const result = await aggregation.exec()
+req.query.search = 'stone';
+const aggregation = new BlesmolAggregation(query, req).search('title;content');
+const result = await aggregation.exec();
 ```
 
 #### Result
 
 ```json
 [
-    {
-        "_id": "5f7b3b3b7b3b7b3b7b3b7b3b",
-        "title": "Stone",
-        "content": "Example content"
-    },
-    {
-        "_id": "5f7b3b3b7b3b7b3b7b3b7b3b",
-        "title": "Keystone",
-        "content": "Example content"
-    },
-    {
-        "_id": "5f7b3b3b7b3b7b3b7b3b7b3b",
-        "title": "Stone age",
-        "content": "Example content"
-    },
-    {
-        "_id": "5f7b3b3b7b3b7b3b7b3b7b3c",
-        "title": "Example title",
-        "content": "This is a stone"
-    }
+  {
+    "_id": "5f7b3b3b7b3b7b3b7b3b7b3b",
+    "title": "Stone",
+    "content": "Example content"
+  },
+  {
+    "_id": "5f7b3b3b7b3b7b3b7b3b7b3b",
+    "title": "Keystone",
+    "content": "Example content"
+  },
+  {
+    "_id": "5f7b3b3b7b3b7b3b7b3b7b3b",
+    "title": "Stone age",
+    "content": "Example content"
+  },
+  {
+    "_id": "5f7b3b3b7b3b7b3b7b3b7b3c",
+    "title": "Example title",
+    "content": "This is a stone"
+  }
 ]
 ```
 
@@ -212,34 +212,34 @@ GET /api/products?fields=date;description;price
 ```
 
 The function shows just this three fields.
- i blesmol-aggregation
+i blesmol-aggregation
 
 ### Populate result fields with `populate()`
 
-It is possible to request the population of specific fields and also to receive only some fields of the populated documents. This is done by first enabling the feature in the BlesmolAggregation contructor with the .populate() addition. In the request then a field can be added with the [p] specifics and the desired fields to be populated as fields, or * to populate all fields. The fields to be populated are separated by a comma.
+It is possible to request the population of specific fields and also to receive only some fields of the populated documents. This is done by first enabling the feature in the BlesmolAggregation contructor with the .populate() addition. In the request then a field can be added with the [p] specifics and the desired fields to be populated as fields, or \* to populate all fields. The fields to be populated are separated by a comma.
 
 #### Example
 
 ```javascript
 const query = await Item.find();
-req.query.createdBy = { p: "name,email"}
+req.query.createdBy = { p: 'name,email' };
 const aggregation = new BlesmolAggregation(query, req).populate();
-const result = await aggregation.exec()
+const result = await aggregation.exec();
 ```
 
 #### Result
 
 ```json
 [
-    {
-        "_id": "5f7b3b3b7b3b7b3b7b3b7b3b",
-        "title": "Stone",
-        "content": "Example content",
-        "createdBy": {
-            "name": "John Doe",
-            "email": "example@example.com"
-        }
-    },
+  {
+    "_id": "5f7b3b3b7b3b7b3b7b3b7b3b",
+    "title": "Stone",
+    "content": "Example content",
+    "createdBy": {
+      "name": "John Doe",
+      "email": "example@example.com"
+    }
+  }
 ]
 ```
 
@@ -248,10 +248,10 @@ const result = await aggregation.exec()
 ```javascript
 const query = await Item.find();
 req.query.createdBy = {
-    p: "*"
-}
+  p: '*'
+};
 const aggregation = new BlesmolAggregation(query, req).populate();
-const result = await aggregation.exec()
+const result = await aggregation.exec();
 ```
 
 #### Result
@@ -291,16 +291,13 @@ GET /api/items?page=3&limit=10
 
 `page` = 3
 `limit` = 10
-`skip` = 10 * (3-1) = 20
+`skip` = 10 \* (3-1) = 20
 //skip two pages with 10 documents per page
 
 #### Example
 
 ```javascript
-const aggregation = new BlesmolAggregation(query, req)
-    .filter()
-    .sort()
-    .paginate()
+const aggregation = new BlesmolAggregation(query, req).filter().sort().paginate();
 
 const results = await aggregation.exec();
 ```
@@ -314,26 +311,26 @@ It is possible to add custom aggregation stages with the addStage function.
 ```javascript
 const query = await Item.find();
 const aggregation = new BlesmolAggregation(query, req)
-                        .filter()
-                        .sort()
-                        .paginate()
-                        .addStage({
-                            $match: {
-                                title: "Stone"
-                            }
-                        });
-const result = await aggregation.exec()
+  .filter()
+  .sort()
+  .paginate()
+  .addStage({
+    $match: {
+      title: 'Stone'
+    }
+  });
+const result = await aggregation.exec();
 ```
 
 #### Result
 
 ```json
 [
-    {
-        "_id": "5f7b3b3b7b3b7b3b7b3b7b3b",
-        "title": "Stone",
-        "content": "Example content"
-    },
+  {
+    "_id": "5f7b3b3b7b3b7b3b7b3b7b3b",
+    "title": "Stone",
+    "content": "Example content"
+  }
 ]
 ```
 
@@ -366,29 +363,27 @@ After the `exec()` function call, the total number of documents is counted and s
 #### Example
 
 ```javascript
-const aggregation = new BlesmolAggregation(Item.find(), req)
-                    .filter()
-                    .sort()
-                    paginate();
+const aggregation = new BlesmolAggregation(Item.find(), req).filter().sort();
+paginate();
 const results = await aggregation.exec();
 const count = results.totalCount();
 ```
 
 ## Nutshell
 
-| Req param     | Description                                                                                   |
-|---------------|-----------------------------------------------------------------------------------------------|
-| `user[p]`     | `"*"` to select all fields, or a semicolon-separated list of specific fields                  |
-| `name`        | Filters for an exact match with the specified string                                          |
-| `name[s]`     | Searches for the specified substring within the field                                         |
-| `name[gt]`    | Filters for values greater than the specified value                                           |
-| `name[gte]`   | Filters for values greater than or equal to the specified value                               |
-| `name[lt]`    | Filters for values less than the specified value                                              |
-| `name[lte]`   | Filters for values less than or equal to the specified value                                  |
-| `name[ne]`    | Filters for values not equal to the specified value                                           |
-| `name[in]`    | Filters for values included in a semicolon-separated list of specified values                 |
-| `name[nin]`   | Filters for values not included in a semicolon-separated list of specified values             |
-| `limit`       | Specifies the maximum number of rows to return                                                |
-| `page`        | Specifies the page number to retrieve; requires `limit` to define the page length             |
-| `search`      | Searches for a value in the collection; the field to check must be predefined in the code     |
-| `user[name]`  | Filters for an exact match within a nested object's `name` field                                |
+| Req param    | Description                                                                               |
+| ------------ | ----------------------------------------------------------------------------------------- |
+| `user[p]`    | `"*"` to select all fields, or a semicolon-separated list of specific fields              |
+| `name`       | Filters for an exact match with the specified string                                      |
+| `name[s]`    | Searches for the specified substring within the field                                     |
+| `name[gt]`   | Filters for values greater than the specified value                                       |
+| `name[gte]`  | Filters for values greater than or equal to the specified value                           |
+| `name[lt]`   | Filters for values less than the specified value                                          |
+| `name[lte]`  | Filters for values less than or equal to the specified value                              |
+| `name[ne]`   | Filters for values not equal to the specified value                                       |
+| `name[in]`   | Filters for values included in a semicolon-separated list of specified values             |
+| `name[nin]`  | Filters for values not included in a semicolon-separated list of specified values         |
+| `limit`      | Specifies the maximum number of rows to return                                            |
+| `page`       | Specifies the page number to retrieve; requires `limit` to define the page length         |
+| `search`     | Searches for a value in the collection; the field to check must be predefined in the code |
+| `user[name]` | Filters for an exact match within a nested object's `name` field                          |
