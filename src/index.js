@@ -1,14 +1,14 @@
-const logger = require("lorikeet-logger");
-const { Request } = require("express");
+const logger = require('lorikeet-logger');
+const { Request } = require('express');
 
 // Utils
-const apiTools = require("./utils/api-tools.utils");
+const apiTools = require('./utils/api-tools.utils');
 
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
 logger.configure({
-  hideLog: process.env.NODE_ENV === "test",
-  emoji: false,
+  hideLog: process.env.NODE_ENV === 'test',
+  emoji: false
 });
 
 class APIfeatures {
@@ -111,8 +111,7 @@ class APIfeatures {
     const queryObj = { ...this.queryString };
     excludedFields.forEach((field) => delete queryObj[field]);
 
-    // Convert the query object to a string and replace the gte, gt, lte, lt, ne with $gte, $gt, $lte, $lt, $ne
-    const queryStr = JSON.stringify(queryObj).replace(/\b(gte|gt|lte|lt|ne|in|nin)\b/g, (match) => `$${match}`);
+    const queryStr = JSON.stringify(queryObj);
 
     const translatableFields =
       this.settings.translations.enabled && this.model.getTranslateTableFields
@@ -129,7 +128,11 @@ class APIfeatures {
         continue;
       }
 
-      const command = field.split('.').pop() || '';
+      const command =
+        field
+          .split('.')
+          .pop()
+          .replace(/\b(gte|gt|lte|lt|ne|in|nin)\b/g, (match) => `$${match}`) || '';
       let cleanedField = field;
       let isUsingCommand = ['$lte', '$lt', '$gte', '$gt', '$ne', '$in', '$nin'].includes(command);
       if (isUsingCommand) {
@@ -196,9 +199,9 @@ class APIfeatures {
       } else {
         filter = useRegex
           ? {
-            $regex: parsedQueryStr[field].s,
-            $options: 'i'
-          }
+              $regex: parsedQueryStr[field].s,
+              $options: 'i'
+            }
           : parsedQueryStr[field];
       }
 
@@ -239,12 +242,12 @@ class APIfeatures {
       return this;
     }
 
-    let relevanceOrder = null
+    let relevanceOrder = null;
 
     if (this.queryString.sort && this.queryString.sort.includes('-relevance')) {
-      relevanceOrder = -1
+      relevanceOrder = -1;
     } else if (this.queryString.sort && this.queryString.sort.includes('relevance')) {
-      relevanceOrder = 1
+      relevanceOrder = 1;
     }
 
     // Check if all the fields are String
@@ -637,9 +640,9 @@ class APIfeatures {
     this.#moveMatchStageAtStart();
   }
 
-  /** 
-   * Then execute the query with aggregation pipeline. 
-    * @returns {Promise<{documents: any[], totalCount: number | null}>} - The documents and the total count.
+  /**
+   * Then execute the query with aggregation pipeline.
+   * @returns {Promise<{documents: any[], totalCount: number | null}>} - The documents and the total count.
    * */
   async exec() {
     this.#orderStagesInPipeline();
@@ -678,4 +681,4 @@ class APIfeatures {
 // Set the default configuration settings
 APIfeatures.configure();
 
-module.exports = APIfeatures
+module.exports = APIfeatures;

@@ -39,6 +39,7 @@ describe('API Tests', () => {
     });
     expectedData.user12 = await User.find({}).sort('name email');
     expectedData.user13 = await User.find({}).sort({ name: 1, email: -1 });
+    expectedData.user14 = await User.find({ name: 'Inatius' });
 
     expectedData.item1 = await Item.find({});
     expectedData.item2 = await Item.find({}).populate('users');
@@ -148,6 +149,9 @@ describe('API Tests', () => {
     });
     it('Should handle /users endpoint with params: sort=name;-email', async () => {
       await testInstance.generateTest('/users', ['sort=name;-email'], expectedData.user13);
+    });
+    it('Should handle /users when a params contain a command like "in": name:Inatius', async () => {
+      await testInstance.generateTest('/users', ['name=Inatius'], expectedData.user14);
     });
 
     // Items
