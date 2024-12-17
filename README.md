@@ -26,23 +26,23 @@ This method is used to configure global settings for the application.
 
 **Parameters:**
 
-- settings: An object containing the configuration settings.
+To configure the module, you can set the following parameters, globally, in the `configure` method, or locally, in the `BlesmolAggregation` constructor (third parameter).
 
-  - fieldsToHide (default: none): Fields to hide in to results: (like password, token, ecc.)
+- fieldsToHide (default: none): Fields to hide in to results: (like password, token, ecc.)
 
-  - translations: Translation settings.
+- translations: Translation settings.
 
-    - enabled (boolean, default: false): Enable or disable translations.
+  - enabled (boolean, default: false): Enable or disable translations.
 
-    - defaultLang (string, default: "en"): Default language for translations.
+  - defaultLang (string, default: "en"): Default language for translations.
 
-  - pagination: Pagination settings.
+- pagination: Pagination settings.
 
-    - defaultLimit (number, default: 25): Default limit for pagination.
+  - defaultLimit (number, default: 25): Default limit for pagination.
 
-  - debug: Debug/logging settings.
+- debug: Debug/logging settings.
 
-    - logQuery (boolean, default: false): Log the API query parameters.
+  - logQuery (boolean, default: false): Log the API query parameters.
 
 ### Example
 
