@@ -199,9 +199,9 @@ class APIfeatures {
       } else {
         filter = useRegex
           ? {
-              $regex: parsedQueryStr[field].s,
-              $options: 'i'
-            }
+            $regex: parsedQueryStr[field].s,
+            $options: 'i'
+          }
           : parsedQueryStr[field];
       }
 
@@ -420,6 +420,11 @@ class APIfeatures {
 
   /** paginate the results, e.g. ?page=2&limit=10 aka handle skip and page stages */
   paginate() {
+    // If the the limit is a negative number, we will remove the pagination
+    if (this.queryString.limit && this.queryString.limit <= -1) {
+      return this;
+    }
+
     const page = this.queryString.page * 1 || 1; // Convert to number with default 1
     const limit = this.queryString.limit * 1 || this.settings.pagination.defaultLimit;
     const skip = limit * (page - 1); // Calculate the number of documents to skip
