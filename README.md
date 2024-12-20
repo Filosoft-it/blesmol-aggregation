@@ -278,6 +278,8 @@ const result = await aggregation.exec();
 The `paginate` function implements data pagination by providing mongoDB with the number of pages to skip and the number of documents per page.
 This function takes query parameters (such as `page` and `limit`) and adds `$skip` and `$limit` stages to the aggregation pipeline. This allows fetching a subset of documents based on the requested page and the number of results per page.
 
+> **INFO**: If `limit` is set to a negative value, pagination will be bypassed, and all results will be returned.
+
 #### Parameters
 
 The function uses the following parameters from the HTTP request:
