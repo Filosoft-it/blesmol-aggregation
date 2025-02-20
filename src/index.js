@@ -466,7 +466,7 @@ class APIfeatures {
 
     const populateFound = [];
     for (let key in this.queryString) {
-      if (this.queryString[key].p) {
+      if (this.queryString[key]?.p) {
         let refModel = this.model.schema.path(key.replace('->', '.')).options.ref;
 
         populateFound.push({
