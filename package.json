@@ -2,7 +2,7 @@
   "name": "blesmol-aggregation",
   "description": "Functions to handle MongoDB queries using Mongoose",
   "readme": "README.md",
-  "version": "0.1.11",
+  "version": "0.1.12",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
