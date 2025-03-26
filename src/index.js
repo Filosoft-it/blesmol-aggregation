@@ -265,7 +265,7 @@ class APIfeatures {
         : null;
 
     const orCriteria = [];
-    const search = this.queryString.search;
+    const search = this.queryString.search.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
     if (search) {
       for (const key of fields.split(';')) {
         let queryKey = key;
@@ -471,7 +471,7 @@ class APIfeatures {
 
     const populateFound = [];
     for (let key in this.queryString) {
-      if (this.queryString[key].p) {
+      if (this.queryString[key]?.p) {
         let refModel = this.model.schema.path(key.replace('->', '.')).options.ref;
 
         populateFound.push({
