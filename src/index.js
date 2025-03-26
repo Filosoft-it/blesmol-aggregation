@@ -265,7 +265,7 @@ class APIfeatures {
         : null;
 
     const orCriteria = [];
-    const search = this.queryString.search;
+    const search = this.queryString.search.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
     if (search) {
       for (const key of fields.split(';')) {
         let queryKey = key;
