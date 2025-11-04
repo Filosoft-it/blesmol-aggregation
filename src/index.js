@@ -199,9 +199,9 @@ class APIfeatures {
       } else {
         filter = useRegex
           ? {
-            $regex: parsedQueryStr[field].s,
-            $options: 'i'
-          }
+              $regex: parsedQueryStr[field].s,
+              $options: 'i'
+            }
           : parsedQueryStr[field];
       }
 
@@ -659,7 +659,9 @@ class APIfeatures {
           documents: [...this.aggregatePipeline],
           ...(this.settings.enableTotalCount !== false && {
             totalCount: [
-              ...this.aggregatePipeline.filter((stage) => !('$skip' in stage) && !('$limit' in stage)),
+              ...this.aggregatePipeline.filter(
+                (stage) => !('$skip' in stage) && !('$limit' in stage) && !('$lookup' in stage)
+              ),
               { $count: 'total' }
             ]
           })
