@@ -2,9 +2,9 @@ name: Test
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
   test:
@@ -13,33 +13,42 @@ jobs:
         # node-version: [16.x, 18.x, 20.x, 22.x] Removed some versions to keep the github action run time low
         node-version: [22.x]
         os: [ubuntu-latest]
-        mongodb-version: ['7.0', '8.0']
+        mongodb-version: ["7.0", "8.0"]
+        express-version: ["4", "5"]
 
     runs-on: ${{ matrix.os }}
 
     steps:
-    - name: Start MongoDB ${{ matrix.mongodb-version }}
-      uses: supercharge/mongodb-github-action@1.11.0
-      with:
-        mongodb-version: ${{ matrix.mongodb-version }}
+      - name: Start MongoDB ${{ matrix.mongodb-version }}
+        uses: supercharge/mongodb-github-action@1.11.0
+        with:
+          mongodb-version: ${{ matrix.mongodb-version }}
 
-    - name: Check MongoDB status
-      run: |
-        ps aux | grep mongod
-        netstat -an | grep 27017
+      - name: Check MongoDB status
+        run: |
+          ps aux | grep mongod
+          netstat -an | grep 27017
 
-    - name: Git checkout
-      uses: actions/checkout@v4
+      - name: Git checkout
+        uses: actions/checkout@v4
 
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "npm"
 
-    - name: Install dependencies
-      run: npm install
+      - name: Install dependencies
+        run: npm install
 
-    - name: Run tests
-      run: npm test
-      timeout-minutes: 5
+      - name: Install Express ${{ matrix.express-version }}
+        run: |
+          if [ "${{ matrix.express-version }}" == "5" ]; then
+            npm install express@^5.2.1 @types/express@^5.0.0 --save-dev
+          else
+            npm install express@^4.21.1 @types/express@^4.17.21 --save-dev
+          fi
+
+      - name: Run tests
+        run: npm test
+        timeout-minutes: 5

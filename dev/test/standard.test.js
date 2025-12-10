@@ -82,7 +82,7 @@ describe('API Tests', () => {
       .limit(1)
       .select('-name -createAt');
     expectedData.customSettingItem5 = await Item.find({}).select('-name -createAt');
-  });
+  }, 15000);
 
   afterAll(async () => {
     // Close the database connection after all tests are done
